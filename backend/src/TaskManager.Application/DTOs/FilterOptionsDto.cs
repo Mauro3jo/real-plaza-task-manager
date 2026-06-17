@@ -1,4 +1,4 @@
-namespace TaskManager.API.Models;
+namespace TaskManager.Application.DTOs;
 
 public sealed record FilterOptionsDto(
     IReadOnlyList<CatalogOptionDto> Priorities,

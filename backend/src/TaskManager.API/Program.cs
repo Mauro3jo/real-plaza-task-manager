@@ -1,10 +1,17 @@
 using TaskManager.API.Data;
-using TaskManager.API.Models;
+using TaskManager.Application;
+using TaskManager.Application.Common;
+using TaskManager.Application.DTOs;
+using TaskManager.Application.Interfaces;
+using TaskManager.Domain.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddApplication();
+builder.Services.AddSingleton<ICatalogRepository, SampleCatalog>();
+builder.Services.AddSingleton<ITaskRepository, SampleTasks>();
 
 var app = builder.Build();
 
@@ -18,24 +25,33 @@ app.MapGet("/health", () => Results.Ok(new { status = "ok" }))
     .WithName("Health")
     .WithTags("Health");
 
-app.MapGet("/api/tasks", (string? status, string? priority) =>
+app.MapGet("/api/tasks", async (
+        ITaskService taskService,
+        string? status,
+        string? priority,
+        CancellationToken cancellationToken) =>
     {
-        if (!SampleTasks.IsValidStatus(status))
-            return Results.BadRequest(new { message = "Estado inválido." });
-
-        if (!SampleTasks.IsValidPriority(priority))
-            return Results.BadRequest(new { message = "Prioridad inválida." });
-
-        return Results.Ok(SampleTasks.GetAll(status, priority));
+        try
+        {
+            var tasks = await taskService.GetTasksAsync(status, priority, cancellationToken);
+            return Results.Ok(tasks);
+        }
+        catch (ValidationException ex)
+        {
+            return Results.BadRequest(new { message = ex.Message });
+        }
     })
     .WithName("GetTasks")
     .WithTags("Tasks")
     .Produces<IReadOnlyList<TaskItemDto>>()
     .Produces(StatusCodes.Status400BadRequest);
 
-app.MapGet("/api/tasks/{id:int}", (int id) =>
+app.MapGet("/api/tasks/{id:int}", async (
+        ITaskService taskService,
+        int id,
+        CancellationToken cancellationToken) =>
     {
-        var task = SampleTasks.GetById(id);
+        var task = await taskService.GetByIdAsync(id, cancellationToken);
         return task is null ? Results.NotFound() : Results.Ok(task);
     })
     .WithName("GetTaskById")
@@ -43,7 +59,13 @@ app.MapGet("/api/tasks/{id:int}", (int id) =>
     .Produces<TaskItemDto>()
     .Produces(StatusCodes.Status404NotFound);
 
-app.MapGet("/api/catalog/filter-options", () => Results.Ok(SampleCatalog.GetFilterOptions()))
+app.MapGet("/api/catalog/filter-options", async (
+        ICatalogService catalogService,
+        CancellationToken cancellationToken) =>
+    {
+        var options = await catalogService.GetFilterOptionsAsync(cancellationToken);
+        return Results.Ok(options);
+    })
     .WithName("GetFilterOptions")
     .WithTags("Catalog")
     .Produces<FilterOptionsDto>();

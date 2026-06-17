@@ -1,6 +1,6 @@
-namespace TaskManager.API.Models;
+namespace TaskManager.Domain.Entities;
 
-public sealed record TaskItemDto(
+public sealed record TaskItem(
     int Id,
     string Title,
     string Description,

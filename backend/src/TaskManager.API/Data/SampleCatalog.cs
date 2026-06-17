@@ -1,34 +1,24 @@
-using TaskManager.API.Models;
+using TaskManager.Domain.Entities;
+using TaskManager.Domain.Repositories;
 
 namespace TaskManager.API.Data;
 
-internal static class SampleCatalog
+internal sealed class SampleCatalog : ICatalogRepository
 {
-    private static readonly IReadOnlyList<CatalogOptionDto> Priorities =
+    private static readonly IReadOnlyList<CatalogOption> Priorities =
     [
         new("LOW", "Baja"),
         new("MEDIUM", "Media"),
         new("HIGH", "Alta")
     ];
 
-    private static readonly IReadOnlyList<CatalogOptionDto> Statuses =
+    private static readonly IReadOnlyList<CatalogOption> Statuses =
     [
         new("PENDING", "Pendiente"),
         new("IN_PROGRESS", "En progreso"),
         new("DONE", "Completada")
     ];
 
-    public static FilterOptionsDto GetFilterOptions() =>
-        new(Priorities, Statuses);
-
-    public static bool IsValidStatus(string? status) =>
-        string.IsNullOrWhiteSpace(status) ||
-        Statuses.Any(option => IsSameCode(option.Code, status));
-
-    public static bool IsValidPriority(string? priority) =>
-        string.IsNullOrWhiteSpace(priority) ||
-        Priorities.Any(option => IsSameCode(option.Code, priority));
-
-    private static bool IsSameCode(string code, string value) =>
-        string.Equals(code, value.Trim(), StringComparison.OrdinalIgnoreCase);
+    public Task<FilterOptions> GetFilterOptionsAsync(CancellationToken cancellationToken = default) =>
+        Task.FromResult(new FilterOptions(Priorities, Statuses));
 }

@@ -1,0 +1,54 @@
+using TaskManager.Application.Common;
+using TaskManager.Application.DTOs;
+using TaskManager.Application.Interfaces;
+using TaskManager.Application.Mappings;
+using TaskManager.Domain.Entities;
+using TaskManager.Domain.Repositories;
+
+namespace TaskManager.Application.Services;
+
+public sealed class TaskService : ITaskService
+{
+    private readonly ITaskRepository _taskRepository;
+    private readonly ICatalogRepository _catalogRepository;
+
+    public TaskService(
+        ITaskRepository taskRepository,
+        ICatalogRepository catalogRepository)
+    {
+        _taskRepository = taskRepository;
+        _catalogRepository = catalogRepository;
+    }
+
+    public async Task<IReadOnlyList<TaskItemDto>> GetTasksAsync(
+        string? status,
+        string? priority,
+        CancellationToken cancellationToken = default)
+    {
+        var options = await _catalogRepository.GetFilterOptionsAsync(cancellationToken);
+
+        if (!IsValid(status, options.Statuses))
+            throw new ValidationException("Estado inválido.");
+
+        if (!IsValid(priority, options.Priorities))
+            throw new ValidationException("Prioridad inválida.");
+
+        var tasks = await _taskRepository.GetAllAsync(status, priority, cancellationToken);
+        return tasks.Select(task => task.ToDto()).ToList();
+    }
+
+    public async Task<TaskItemDto?> GetByIdAsync(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        var task = await _taskRepository.GetByIdAsync(id, cancellationToken);
+        return task?.ToDto();
+    }
+
+    private static bool IsValid(string? code, IReadOnlyList<CatalogOption> options) =>
+        string.IsNullOrWhiteSpace(code) ||
+        options.Any(option => string.Equals(
+            option.Code,
+            code.Trim(),
+            StringComparison.OrdinalIgnoreCase));
+}

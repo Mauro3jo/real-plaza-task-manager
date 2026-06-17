@@ -1,10 +1,11 @@
-using TaskManager.API.Models;
+using TaskManager.Domain.Entities;
+using TaskManager.Domain.Repositories;
 
 namespace TaskManager.API.Data;
 
-internal static class SampleTasks
+internal sealed class SampleTasks : ITaskRepository
 {
-    private static readonly IReadOnlyList<TaskItemDto> Items =
+    private static readonly IReadOnlyList<TaskItem> Items =
     [
         new(1, "Configurar entorno de desarrollo", "Instalar SDKs y dependencias base.", "HIGH", "Alta", "DONE", "Completada"),
         new(2, "Diseñar esquema de base de datos", "Definir tablas de tareas, prioridades y estados.", "HIGH", "Alta", "DONE", "Completada"),
@@ -13,7 +14,10 @@ internal static class SampleTasks
         new(5, "Agregar filtros", "Permitir filtrar por estado y prioridad.", "MEDIUM", "Media", "PENDING", "Pendiente")
     ];
 
-    public static IReadOnlyList<TaskItemDto> GetAll(string? status, string? priority)
+    public Task<IReadOnlyList<TaskItem>> GetAllAsync(
+        string? status,
+        string? priority,
+        CancellationToken cancellationToken = default)
     {
         var query = Items.AsEnumerable();
 
@@ -29,15 +33,11 @@ internal static class SampleTasks
                 string.Equals(task.PriorityCode, priority.Trim(), StringComparison.OrdinalIgnoreCase));
         }
 
-        return query.ToList();
+        return Task.FromResult<IReadOnlyList<TaskItem>>(query.ToList());
     }
 
-    public static TaskItemDto? GetById(int id) =>
-        Items.FirstOrDefault(task => task.Id == id);
-
-    public static bool IsValidStatus(string? status) =>
-        SampleCatalog.IsValidStatus(status);
-
-    public static bool IsValidPriority(string? priority) =>
-        SampleCatalog.IsValidPriority(priority);
+    public Task<TaskItem?> GetByIdAsync(
+        int id,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult(Items.FirstOrDefault(task => task.Id == id));
 }
