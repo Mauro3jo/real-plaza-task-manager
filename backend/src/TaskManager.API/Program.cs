@@ -1,5 +1,5 @@
+using TaskManager.API.Middleware;
 using TaskManager.Application;
-using TaskManager.Application.Common;
 using TaskManager.Application.DTOs;
 using TaskManager.Application.Interfaces;
 using TaskManager.Infrastructure;
@@ -12,6 +12,8 @@ builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
@@ -29,15 +31,8 @@ app.MapGet("/api/tasks", async (
         string? priority,
         CancellationToken cancellationToken) =>
     {
-        try
-        {
-            var tasks = await taskService.GetTasksAsync(status, priority, cancellationToken);
-            return Results.Ok(tasks);
-        }
-        catch (ValidationException ex)
-        {
-            return Results.BadRequest(new { message = ex.Message });
-        }
+        var tasks = await taskService.GetTasksAsync(status, priority, cancellationToken);
+        return Results.Ok(tasks);
     })
     .WithName("GetTasks")
     .WithTags("Tasks")
