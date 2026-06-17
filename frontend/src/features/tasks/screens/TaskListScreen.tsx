@@ -1,13 +1,14 @@
 import React, {useMemo, useState} from 'react';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {FlatList, RefreshControl, Text, View} from 'react-native';
+import {Screen} from '../../../components/Screen';
 import {EmptyList, StateView} from '../../../components/StateViews';
 import {RootStackParamList} from '../../../navigation/types';
 import {TaskCard} from '../components/TaskCard';
 import {TaskFilters} from '../components/TaskFilters';
 import {useFilterOptions} from '../hooks/useFilterOptions';
 import {useTasks} from '../hooks/useTasks';
-import {styles} from '../../../styles/appStyles';
+import {styles} from './TaskListScreen.styles';
 
 type TaskListScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -39,7 +40,7 @@ export function TaskListScreen({navigation}: TaskListScreenProps) {
   };
 
   return (
-    <>
+    <Screen>
       <View style={styles.header}>
         <View style={styles.headerText}>
           <Text style={styles.title}>Mis tareas</Text>
@@ -112,7 +113,7 @@ export function TaskListScreen({navigation}: TaskListScreenProps) {
           )}
         />
       )}
-    </>
+    </Screen>
   );
 }
 

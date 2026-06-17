@@ -2,14 +2,12 @@ import React from 'react';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {ScrollView, Text, View} from 'react-native';
 import {Badge} from '../../../components/Badge';
+import {Screen} from '../../../components/Screen';
 import {StateView} from '../../../components/StateViews';
 import {RootStackParamList} from '../../../navigation/types';
-import {
-  getPriorityColors,
-  getStatusColors,
-  styles,
-} from '../../../styles/appStyles';
+import {getPriorityColors, getStatusColors} from '../../../styles/appStyles';
 import {useTaskDetail} from '../hooks/useTaskDetail';
+import {styles} from './TaskDetailScreen.styles';
 
 type TaskDetailScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -23,7 +21,7 @@ export function TaskDetailScreen({
   const {task, isLoading, error, loadTaskDetail} = useTaskDetail(taskId);
 
   return (
-    <View style={styles.detailScreen}>
+    <Screen edges={['left', 'right', 'bottom']}>
       {isLoading ? (
         <StateView message="Cargando detalle..." />
       ) : error ? (
@@ -63,7 +61,7 @@ export function TaskDetailScreen({
       ) : (
         <StateView message={`No se encontró la tarea #${taskId}.`} />
       )}
-    </View>
+    </Screen>
   );
 }
 

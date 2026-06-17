@@ -65,41 +65,6 @@ export function getNeutralColors(): BadgeColors {
 }
 
 export const styles = StyleSheet.create({
-  header: {
-    alignItems: 'flex-start',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingBottom: 16,
-    paddingHorizontal: 20,
-    paddingTop: 20,
-  },
-  headerText: {
-    flex: 1,
-    paddingRight: 16,
-  },
-  title: {
-    color: '#111827',
-    fontSize: 30,
-    fontWeight: '800',
-  },
-  subtitle: {
-    color: '#64748B',
-    fontSize: 14,
-    marginTop: 6,
-  },
-  apiPill: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#D1D5DB',
-    borderRadius: 999,
-    borderWidth: 1,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-  },
-  apiPillText: {
-    color: '#374151',
-    fontSize: 12,
-    fontWeight: '800',
-  },
   filterPanel: {
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
@@ -221,40 +186,6 @@ export const styles = StyleSheet.create({
     fontSize: 13,
     marginTop: 10,
   },
-  listContent: {
-    padding: 16,
-    paddingBottom: 28,
-  },
-  listHeader: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  listTitle: {
-    color: '#111827',
-    fontSize: 16,
-    fontWeight: '800',
-  },
-  listSubtitle: {
-    color: '#64748B',
-    fontSize: 13,
-    marginTop: 2,
-  },
-  countPill: {
-    alignItems: 'center',
-    backgroundColor: '#111827',
-    borderRadius: 8,
-    justifyContent: 'center',
-    minWidth: 40,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-  },
-  countPillText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '800',
-  },
   card: {
     backgroundColor: '#FFFFFF',
     borderColor: '#E5E7EB',
@@ -322,80 +253,6 @@ export const styles = StyleSheet.create({
   badgeText: {
     fontSize: 12,
     fontWeight: '800',
-  },
-  detailScreen: {
-    flex: 1,
-  },
-  detailContent: {
-    padding: 16,
-    paddingBottom: 28,
-  },
-  detailSummary: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#E5E7EB',
-    borderRadius: 8,
-    borderWidth: 1,
-    padding: 18,
-  },
-  detailId: {
-    color: '#64748B',
-    fontSize: 13,
-    fontWeight: '800',
-    marginBottom: 8,
-  },
-  detailTitle: {
-    color: '#111827',
-    fontSize: 24,
-    fontWeight: '800',
-    lineHeight: 31,
-  },
-  detailSection: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#E5E7EB',
-    borderRadius: 8,
-    borderWidth: 1,
-    marginTop: 12,
-    padding: 18,
-  },
-  detailLabel: {
-    color: '#64748B',
-    fontSize: 12,
-    fontWeight: '800',
-    marginBottom: 8,
-    textTransform: 'uppercase',
-  },
-  detailDescription: {
-    color: '#334155',
-    fontSize: 16,
-    lineHeight: 24,
-  },
-  detailRows: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#E5E7EB',
-    borderRadius: 8,
-    borderWidth: 1,
-    marginTop: 12,
-    overflow: 'hidden',
-  },
-  infoRow: {
-    borderBottomWidth: 1,
-    borderColor: '#E5E7EB',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 18,
-    paddingVertical: 14,
-  },
-  infoLabel: {
-    color: '#64748B',
-    fontSize: 14,
-    fontWeight: '800',
-  },
-  infoValue: {
-    color: '#111827',
-    flexShrink: 1,
-    fontSize: 14,
-    fontWeight: '800',
-    textAlign: 'right',
   },
   centerState: {
     alignItems: 'center',
