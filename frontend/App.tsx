@@ -10,7 +10,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import {getFilterOptions, getTasks} from './src/api/tasksApi';
+import {getFilterOptions, getTaskById, getTasks} from './src/api/tasksApi';
 import {CatalogOption, FilterOptions, TaskItem} from './src/domain/task';
 
 const emptyFilterOptions: FilterOptions = {
@@ -24,9 +24,13 @@ function App(): React.JSX.Element {
     useState<FilterOptions>(emptyFilterOptions);
   const [selectedStatus, setSelectedStatus] = useState<string>();
   const [selectedPriority, setSelectedPriority] = useState<string>();
+  const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
+  const [selectedTask, setSelectedTask] = useState<TaskItem | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isDetailLoading, setIsDetailLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [detailError, setDetailError] = useState<string | null>(null);
   const [filtersError, setFiltersError] = useState<string | null>(null);
 
   const hasActiveFilters = Boolean(selectedStatus || selectedPriority);
@@ -69,6 +73,23 @@ function App(): React.JSX.Element {
     [selectedPriority, selectedStatus],
   );
 
+  const loadTaskDetail = useCallback(async (id: number) => {
+    setIsDetailLoading(true);
+    setDetailError(null);
+    setSelectedTask(null);
+
+    try {
+      const result = await getTaskById(id);
+      setSelectedTask(result);
+    } catch (err) {
+      setDetailError(
+        err instanceof Error ? err.message : 'No se pudo cargar el detalle.',
+      );
+    } finally {
+      setIsDetailLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     loadFilterOptions();
   }, [loadFilterOptions]);
@@ -81,6 +102,35 @@ function App(): React.JSX.Element {
     setSelectedStatus(undefined);
     setSelectedPriority(undefined);
   };
+
+  const openTaskDetail = (id: number) => {
+    setSelectedTaskId(id);
+    loadTaskDetail(id);
+  };
+
+  const closeTaskDetail = () => {
+    setSelectedTaskId(null);
+    setSelectedTask(null);
+    setDetailError(null);
+  };
+
+  const taskId = selectedTaskId;
+
+  if (taskId !== null) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <StatusBar barStyle="dark-content" backgroundColor="#F7F8FA" />
+        <TaskDetailScreen
+          error={detailError}
+          isLoading={isDetailLoading}
+          task={selectedTask}
+          taskId={taskId}
+          onBack={closeTaskDetail}
+          onRetry={() => loadTaskDetail(taskId)}
+        />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -134,10 +184,87 @@ function App(): React.JSX.Element {
               </Text>
             </View>
           }
-          renderItem={({item}) => <TaskCard task={item} />}
+          renderItem={({item}) => (
+            <TaskCard task={item} onPress={() => openTaskDetail(item.id)} />
+          )}
         />
       )}
     </SafeAreaView>
+  );
+}
+
+function TaskDetailScreen({
+  error,
+  isLoading,
+  task,
+  taskId,
+  onBack,
+  onRetry,
+}: {
+  error: string | null;
+  isLoading: boolean;
+  task: TaskItem | null;
+  taskId: number;
+  onBack: () => void;
+  onRetry: () => void;
+}) {
+  return (
+    <View style={styles.detailScreen}>
+      <View style={styles.detailHeader}>
+        <Pressable style={styles.backButton} onPress={onBack}>
+          <Text style={styles.backText}>Volver</Text>
+        </Pressable>
+        <Text style={styles.detailHeaderTitle}>Detalle de tarea</Text>
+      </View>
+
+      {isLoading ? (
+        <View style={styles.centerState}>
+          <ActivityIndicator size="large" color="#1D4ED8" />
+          <Text style={styles.stateText}>Cargando detalle...</Text>
+        </View>
+      ) : error ? (
+        <View style={styles.centerState}>
+          <Text style={styles.errorTitle}>No se pudo cargar</Text>
+          <Text style={styles.stateText}>{error}</Text>
+          <Pressable style={styles.retryButton} onPress={onRetry}>
+            <Text style={styles.retryText}>Reintentar</Text>
+          </Pressable>
+        </View>
+      ) : task ? (
+        <View style={styles.detailContent}>
+          <Text style={styles.detailId}>Tarea #{task.id}</Text>
+          <Text style={styles.detailTitle}>{task.title}</Text>
+
+          <View style={styles.badges}>
+            <Badge label={task.priorityName} tone="priority" />
+            <Badge label={task.statusName} tone="status" />
+          </View>
+
+          <View style={styles.detailSection}>
+            <Text style={styles.detailLabel}>Descripcion</Text>
+            <Text style={styles.detailDescription}>{task.description}</Text>
+          </View>
+
+          <View style={styles.detailRows}>
+            <InfoRow label="Prioridad" value={task.priorityName} />
+            <InfoRow label="Estado" value={task.statusName} />
+          </View>
+        </View>
+      ) : (
+        <View style={styles.centerState}>
+          <Text style={styles.stateText}>No se encontro la tarea #{taskId}.</Text>
+        </View>
+      )}
+    </View>
+  );
+}
+
+function InfoRow({label, value}: {label: string; value: string}) {
+  return (
+    <View style={styles.infoRow}>
+      <Text style={styles.infoLabel}>{label}</Text>
+      <Text style={styles.infoValue}>{value}</Text>
+    </View>
   );
 }
 
@@ -248,9 +375,11 @@ function FilterChip({
   );
 }
 
-function TaskCard({task}: {task: TaskItem}) {
+function TaskCard({task, onPress}: {task: TaskItem; onPress: () => void}) {
   return (
-    <View style={styles.card}>
+    <Pressable
+      style={({pressed}) => [styles.card, pressed ? styles.cardPressed : null]}
+      onPress={onPress}>
       <View style={styles.cardHeader}>
         <Text style={styles.cardTitle}>{task.title}</Text>
         <Text style={styles.taskId}>#{task.id}</Text>
@@ -260,7 +389,7 @@ function TaskCard({task}: {task: TaskItem}) {
         <Badge label={task.priorityName} tone="priority" />
         <Badge label={task.statusName} tone="status" />
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -295,6 +424,90 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     fontSize: 14,
     marginTop: 4,
+  },
+  detailScreen: {
+    flex: 1,
+  },
+  detailHeader: {
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderColor: '#E5E7EB',
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  backButton: {
+    borderRadius: 8,
+    paddingHorizontal: 4,
+    paddingVertical: 6,
+  },
+  backText: {
+    color: '#1D4ED8',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  detailHeaderTitle: {
+    color: '#111827',
+    flex: 1,
+    fontSize: 17,
+    fontWeight: '700',
+    marginRight: 45,
+    textAlign: 'center',
+  },
+  detailContent: {
+    padding: 20,
+  },
+  detailId: {
+    color: '#6B7280',
+    fontSize: 13,
+    fontWeight: '700',
+    marginBottom: 8,
+  },
+  detailTitle: {
+    color: '#111827',
+    fontSize: 24,
+    fontWeight: '700',
+    lineHeight: 30,
+  },
+  detailSection: {
+    borderTopWidth: 1,
+    borderColor: '#E5E7EB',
+    marginTop: 24,
+    paddingTop: 18,
+  },
+  detailLabel: {
+    color: '#6B7280',
+    fontSize: 12,
+    fontWeight: '700',
+    marginBottom: 8,
+    textTransform: 'uppercase',
+  },
+  detailDescription: {
+    color: '#374151',
+    fontSize: 16,
+    lineHeight: 24,
+  },
+  detailRows: {
+    borderTopWidth: 1,
+    borderColor: '#E5E7EB',
+    marginTop: 24,
+  },
+  infoRow: {
+    borderBottomWidth: 1,
+    borderColor: '#E5E7EB',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 14,
+  },
+  infoLabel: {
+    color: '#6B7280',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  infoValue: {
+    color: '#111827',
+    fontSize: 14,
+    fontWeight: '700',
   },
   filterPanel: {
     borderTopWidth: 1,
@@ -370,6 +583,9 @@ const styles = StyleSheet.create({
     borderColor: '#E5E7EB',
     padding: 16,
     marginBottom: 12,
+  },
+  cardPressed: {
+    borderColor: '#93C5FD',
   },
   cardHeader: {
     flexDirection: 'row',

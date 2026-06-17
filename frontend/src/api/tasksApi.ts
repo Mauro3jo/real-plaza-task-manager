@@ -42,6 +42,10 @@ export function getTasks(filters: TaskFilters = {}): Promise<TaskItem[]> {
   return request<TaskItem[]>(buildTaskPath(filters));
 }
 
+export function getTaskById(id: number): Promise<TaskItem> {
+  return request<TaskItem>(`/api/tasks/${id}`);
+}
+
 export function getFilterOptions(): Promise<FilterOptions> {
   return request<FilterOptions>('/api/catalog/filter-options');
 }
