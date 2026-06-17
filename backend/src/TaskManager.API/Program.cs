@@ -1,17 +1,15 @@
-using TaskManager.API.Data;
 using TaskManager.Application;
 using TaskManager.Application.Common;
 using TaskManager.Application.DTOs;
 using TaskManager.Application.Interfaces;
-using TaskManager.Domain.Repositories;
+using TaskManager.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddApplication();
-builder.Services.AddSingleton<ICatalogRepository, SampleCatalog>();
-builder.Services.AddSingleton<ITaskRepository, SampleTasks>();
+builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 
