@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {
   FlatList,
   Pressable,
@@ -9,12 +9,13 @@ import {
   Text,
   View,
 } from 'react-native';
-import {getFilterOptions, getTaskById, getTasks} from './src/api/tasksApi';
+import {getFilterOptions, getTaskById} from './src/api/tasksApi';
 import {Badge} from './src/components/Badge';
 import {EmptyList, StateView} from './src/components/StateViews';
 import {FilterOptions, TaskItem} from './src/domain/task';
 import {TaskCard} from './src/features/tasks/components/TaskCard';
 import {TaskFilters} from './src/features/tasks/components/TaskFilters';
+import {useTasks} from './src/features/tasks/hooks/useTasks';
 import {
   getPriorityColors,
   getStatusColors,
@@ -27,7 +28,6 @@ const emptyFilterOptions: FilterOptions = {
 };
 
 function App(): React.JSX.Element {
-  const [tasks, setTasks] = useState<TaskItem[]>([]);
   const [filterOptions, setFilterOptions] =
     useState<FilterOptions>(emptyFilterOptions);
   const [selectedStatus, setSelectedStatus] = useState<string>();
@@ -35,12 +35,19 @@ function App(): React.JSX.Element {
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
   const [selectedTask, setSelectedTask] = useState<TaskItem | null>(null);
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [isDetailLoading, setIsDetailLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [detailError, setDetailError] = useState<string | null>(null);
   const [filtersError, setFiltersError] = useState<string | null>(null);
+
+  const taskFilters = useMemo(
+    () => ({
+      status: selectedStatus,
+      priority: selectedPriority,
+    }),
+    [selectedPriority, selectedStatus],
+  );
+  const {tasks, isLoading, isRefreshing, error, loadTasks} =
+    useTasks(taskFilters);
 
   const activeFilterCount = [selectedStatus, selectedPriority].filter(Boolean).length;
   const hasActiveFilters = activeFilterCount > 0;
@@ -54,34 +61,6 @@ function App(): React.JSX.Element {
       setFiltersError('No se pudieron cargar los filtros.');
     }
   }, []);
-
-  const loadTasks = useCallback(
-    async (refreshing = false) => {
-      if (refreshing) {
-        setIsRefreshing(true);
-      } else {
-        setIsLoading(true);
-      }
-
-      setError(null);
-
-      try {
-        const result = await getTasks({
-          status: selectedStatus,
-          priority: selectedPriority,
-        });
-        setTasks(result);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : 'No se pudo cargar la lista.',
-        );
-      } finally {
-        setIsLoading(false);
-        setIsRefreshing(false);
-      }
-    },
-    [selectedPriority, selectedStatus],
-  );
 
   const loadTaskDetail = useCallback(async (id: number) => {
     setIsDetailLoading(true);
@@ -103,10 +82,6 @@ function App(): React.JSX.Element {
   useEffect(() => {
     loadFilterOptions();
   }, [loadFilterOptions]);
-
-  useEffect(() => {
-    loadTasks();
-  }, [loadTasks]);
 
   const clearFilters = () => {
     setSelectedStatus(undefined);
