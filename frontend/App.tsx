@@ -5,13 +5,22 @@ import {
   Pressable,
   RefreshControl,
   SafeAreaView,
+  ScrollView,
   StatusBar,
-  StyleSheet,
   Text,
   View,
 } from 'react-native';
 import {getFilterOptions, getTaskById, getTasks} from './src/api/tasksApi';
 import {CatalogOption, FilterOptions, TaskItem} from './src/domain/task';
+import {
+  getNeutralColors,
+  getPriorityColors,
+  getStatusColors,
+  styles,
+  type BadgeColors,
+} from './src/styles/appStyles';
+
+type FilterKind = 'status' | 'priority';
 
 const emptyFilterOptions: FilterOptions = {
   priorities: [],
@@ -26,6 +35,7 @@ function App(): React.JSX.Element {
   const [selectedPriority, setSelectedPriority] = useState<string>();
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
   const [selectedTask, setSelectedTask] = useState<TaskItem | null>(null);
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isDetailLoading, setIsDetailLoading] = useState(false);
@@ -33,7 +43,8 @@ function App(): React.JSX.Element {
   const [detailError, setDetailError] = useState<string | null>(null);
   const [filtersError, setFiltersError] = useState<string | null>(null);
 
-  const hasActiveFilters = Boolean(selectedStatus || selectedPriority);
+  const activeFilterCount = [selectedStatus, selectedPriority].filter(Boolean).length;
+  const hasActiveFilters = activeFilterCount > 0;
 
   const loadFilterOptions = useCallback(async () => {
     try {
@@ -119,7 +130,7 @@ function App(): React.JSX.Element {
   if (taskId !== null) {
     return (
       <SafeAreaView style={styles.safeArea}>
-        <StatusBar barStyle="dark-content" backgroundColor="#F7F8FA" />
+        <StatusBar barStyle="dark-content" backgroundColor="#F6F7F9" />
         <TaskDetailScreen
           error={detailError}
           isLoading={isDetailLoading}
@@ -134,13 +145,24 @@ function App(): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F7F8FA" />
+      <StatusBar barStyle="dark-content" backgroundColor="#F6F7F9" />
       <View style={styles.header}>
-        <Text style={styles.title}>Mis tareas</Text>
-        <Text style={styles.subtitle}>Datos desde la API .NET</Text>
+        <View style={styles.headerText}>
+          <Text style={styles.title}>Mis tareas</Text>
+          <Text style={styles.subtitle}>
+            {isLoading
+              ? 'Sincronizando con la API'
+              : `${tasks.length} ${tasks.length === 1 ? 'tarea' : 'tareas'} en vista`}
+          </Text>
+        </View>
+        <View style={styles.apiPill}>
+          <Text style={styles.apiPillText}>API .NET</Text>
+        </View>
       </View>
 
       <FilterPanel
+        activeFilterCount={activeFilterCount}
+        expanded={isFilterPanelOpen}
         filterOptions={filterOptions}
         filtersError={filtersError}
         hasActiveFilters={hasActiveFilters}
@@ -149,40 +171,39 @@ function App(): React.JSX.Element {
         onChangePriority={setSelectedPriority}
         onChangeStatus={setSelectedStatus}
         onClear={clearFilters}
+        onToggle={() => setIsFilterPanelOpen(value => !value)}
       />
 
       {isLoading ? (
-        <View style={styles.centerState}>
-          <ActivityIndicator size="large" color="#1D4ED8" />
-          <Text style={styles.stateText}>Cargando tareas...</Text>
-        </View>
+        <StateView message="Cargando tareas..." />
       ) : error ? (
-        <View style={styles.centerState}>
-          <Text style={styles.errorTitle}>No se pudo cargar</Text>
-          <Text style={styles.stateText}>{error}</Text>
-          <Pressable style={styles.retryButton} onPress={() => loadTasks()}>
-            <Text style={styles.retryText}>Reintentar</Text>
-          </Pressable>
-        </View>
+        <StateView
+          message={error}
+          title="No se pudo cargar"
+          actionLabel="Reintentar"
+          onAction={() => loadTasks()}
+        />
       ) : (
         <FlatList
           data={tasks}
           keyExtractor={item => String(item.id)}
           contentContainerStyle={styles.listContent}
+          ListHeaderComponent={
+            <ListHeader
+              activeFilterCount={activeFilterCount}
+              hasActiveFilters={hasActiveFilters}
+              tasksCount={tasks.length}
+            />
+          }
           refreshControl={
             <RefreshControl
               refreshing={isRefreshing}
               onRefresh={() => loadTasks(true)}
+              tintColor="#2563EB"
             />
           }
           ListEmptyComponent={
-            <View style={styles.emptyState}>
-              <Text style={styles.stateText}>
-                {hasActiveFilters
-                  ? 'No hay tareas con estos filtros.'
-                  : 'No hay tareas para mostrar.'}
-              </Text>
-            </View>
+            <EmptyList hasActiveFilters={hasActiveFilters} />
           }
           renderItem={({item}) => (
             <TaskCard task={item} onPress={() => openTaskDetail(item.id)} />
@@ -190,6 +211,73 @@ function App(): React.JSX.Element {
         />
       )}
     </SafeAreaView>
+  );
+}
+
+function ListHeader({
+  activeFilterCount,
+  hasActiveFilters,
+  tasksCount,
+}: {
+  activeFilterCount: number;
+  hasActiveFilters: boolean;
+  tasksCount: number;
+}) {
+  return (
+    <View style={styles.listHeader}>
+      <View>
+        <Text style={styles.listTitle}>Listado</Text>
+        <Text style={styles.listSubtitle}>
+          {hasActiveFilters
+            ? `${activeFilterCount} ${activeFilterCount === 1 ? 'filtro aplicado' : 'filtros aplicados'}`
+            : 'Todas las tareas'}
+        </Text>
+      </View>
+      <View style={styles.countPill}>
+        <Text style={styles.countPillText}>{tasksCount}</Text>
+      </View>
+    </View>
+  );
+}
+
+function EmptyList({hasActiveFilters}: {hasActiveFilters: boolean}) {
+  return (
+    <View style={styles.emptyState}>
+      <Text style={styles.emptyTitle}>Sin tareas para mostrar</Text>
+      <Text style={styles.stateText}>
+        {hasActiveFilters
+          ? 'Probá limpiar o cambiar los filtros.'
+          : 'Todavía no hay tareas cargadas.'}
+      </Text>
+    </View>
+  );
+}
+
+function StateView({
+  actionLabel,
+  message,
+  onAction,
+  title,
+}: {
+  actionLabel?: string;
+  message: string;
+  onAction?: () => void;
+  title?: string;
+}) {
+  return (
+    <View style={styles.centerState}>
+      {title ? (
+        <Text style={styles.errorTitle}>{title}</Text>
+      ) : (
+        <ActivityIndicator size="large" color="#2563EB" />
+      )}
+      <Text style={styles.stateText}>{message}</Text>
+      {actionLabel && onAction ? (
+        <Pressable style={styles.retryButton} onPress={onAction}>
+          <Text style={styles.retryText}>{actionLabel}</Text>
+        </Pressable>
+      ) : null}
+    </View>
   );
 }
 
@@ -214,34 +302,37 @@ function TaskDetailScreen({
         <Pressable style={styles.backButton} onPress={onBack}>
           <Text style={styles.backText}>Volver</Text>
         </Pressable>
-        <Text style={styles.detailHeaderTitle}>Detalle de tarea</Text>
+        <Text style={styles.detailHeaderTitle}>Detalle</Text>
       </View>
 
       {isLoading ? (
-        <View style={styles.centerState}>
-          <ActivityIndicator size="large" color="#1D4ED8" />
-          <Text style={styles.stateText}>Cargando detalle...</Text>
-        </View>
+        <StateView message="Cargando detalle..." />
       ) : error ? (
-        <View style={styles.centerState}>
-          <Text style={styles.errorTitle}>No se pudo cargar</Text>
-          <Text style={styles.stateText}>{error}</Text>
-          <Pressable style={styles.retryButton} onPress={onRetry}>
-            <Text style={styles.retryText}>Reintentar</Text>
-          </Pressable>
-        </View>
+        <StateView
+          message={error}
+          title="No se pudo cargar"
+          actionLabel="Reintentar"
+          onAction={onRetry}
+        />
       ) : task ? (
-        <View style={styles.detailContent}>
-          <Text style={styles.detailId}>Tarea #{task.id}</Text>
-          <Text style={styles.detailTitle}>{task.title}</Text>
-
-          <View style={styles.badges}>
-            <Badge label={task.priorityName} tone="priority" />
-            <Badge label={task.statusName} tone="status" />
+        <ScrollView contentContainerStyle={styles.detailContent}>
+          <View style={styles.detailSummary}>
+            <Text style={styles.detailId}>Tarea #{task.id}</Text>
+            <Text style={styles.detailTitle}>{task.title}</Text>
+            <View style={styles.badges}>
+              <Badge
+                colors={getPriorityColors(task.priorityCode)}
+                label={task.priorityName}
+              />
+              <Badge
+                colors={getStatusColors(task.statusCode)}
+                label={task.statusName}
+              />
+            </View>
           </View>
 
           <View style={styles.detailSection}>
-            <Text style={styles.detailLabel}>Descripcion</Text>
+            <Text style={styles.detailLabel}>Descripción</Text>
             <Text style={styles.detailDescription}>{task.description}</Text>
           </View>
 
@@ -249,11 +340,9 @@ function TaskDetailScreen({
             <InfoRow label="Prioridad" value={task.priorityName} />
             <InfoRow label="Estado" value={task.statusName} />
           </View>
-        </View>
+        </ScrollView>
       ) : (
-        <View style={styles.centerState}>
-          <Text style={styles.stateText}>No se encontro la tarea #{taskId}.</Text>
-        </View>
+        <StateView message={`No se encontró la tarea #${taskId}.`} />
       )}
     </View>
   );
@@ -269,6 +358,8 @@ function InfoRow({label, value}: {label: string; value: string}) {
 }
 
 function FilterPanel({
+  activeFilterCount,
+  expanded,
   filterOptions,
   filtersError,
   hasActiveFilters,
@@ -277,7 +368,10 @@ function FilterPanel({
   onChangePriority,
   onChangeStatus,
   onClear,
+  onToggle,
 }: {
+  activeFilterCount: number;
+  expanded: boolean;
   filterOptions: FilterOptions;
   filtersError: string | null;
   hasActiveFilters: boolean;
@@ -286,30 +380,75 @@ function FilterPanel({
   onChangePriority: (code?: string) => void;
   onChangeStatus: (code?: string) => void;
   onClear: () => void;
+  onToggle: () => void;
 }) {
+  const selectedStatusOption = filterOptions.statuses.find(
+    option => option.code === selectedStatus,
+  );
+  const selectedPriorityOption = filterOptions.priorities.find(
+    option => option.code === selectedPriority,
+  );
+
   return (
     <View style={styles.filterPanel}>
-      <View style={styles.filterHeader}>
-        <Text style={styles.filterTitle}>Filtros</Text>
+      <View style={styles.filterBar}>
+        <Pressable style={styles.filterToggle} onPress={onToggle}>
+          <Text style={styles.filterToggleText}>
+            {expanded ? 'Ocultar filtros' : 'Filtros'}
+          </Text>
+          {activeFilterCount ? (
+            <View style={styles.filterCountBadge}>
+              <Text style={styles.filterCountText}>{activeFilterCount}</Text>
+            </View>
+          ) : null}
+        </Pressable>
+
+        <ScrollView
+          horizontal
+          contentContainerStyle={styles.activeFilters}
+          showsHorizontalScrollIndicator={false}>
+          {selectedStatusOption ? (
+            <ActiveFilterChip
+              label={selectedStatusOption.name}
+              onRemove={() => onChangeStatus(undefined)}
+            />
+          ) : null}
+          {selectedPriorityOption ? (
+            <ActiveFilterChip
+              label={selectedPriorityOption.name}
+              onRemove={() => onChangePriority(undefined)}
+            />
+          ) : null}
+          {!hasActiveFilters ? (
+            <Text style={styles.noFiltersText}>Sin filtros</Text>
+          ) : null}
+        </ScrollView>
+
         {hasActiveFilters ? (
-          <Pressable onPress={onClear}>
-            <Text style={styles.clearText}>Limpiar</Text>
+          <Pressable style={styles.clearInlineButton} onPress={onClear}>
+            <Text style={styles.clearInlineText}>Limpiar</Text>
           </Pressable>
         ) : null}
       </View>
 
-      <FilterGroup
-        label="Estado"
-        options={filterOptions.statuses}
-        selectedCode={selectedStatus}
-        onChange={onChangeStatus}
-      />
-      <FilterGroup
-        label="Prioridad"
-        options={filterOptions.priorities}
-        selectedCode={selectedPriority}
-        onChange={onChangePriority}
-      />
+      {expanded ? (
+        <View style={styles.filterSheet}>
+          <FilterGroup
+            kind="status"
+            label="Estado"
+            options={filterOptions.statuses}
+            selectedCode={selectedStatus}
+            onChange={onChangeStatus}
+          />
+          <FilterGroup
+            kind="priority"
+            label="Prioridad"
+            options={filterOptions.priorities}
+            selectedCode={selectedPriority}
+            onChange={onChangePriority}
+          />
+        </View>
+      ) : null}
 
       {filtersError ? (
         <Text style={styles.filterError}>{filtersError}</Text>
@@ -318,12 +457,31 @@ function FilterPanel({
   );
 }
 
+function ActiveFilterChip({
+  label,
+  onRemove,
+}: {
+  label: string;
+  onRemove: () => void;
+}) {
+  return (
+    <Pressable style={styles.activeFilterChip} onPress={onRemove}>
+      <Text numberOfLines={1} style={styles.activeFilterText}>
+        {label}
+      </Text>
+      <Text style={styles.activeFilterRemove}>x</Text>
+    </Pressable>
+  );
+}
+
 function FilterGroup({
+  kind,
   label,
   options,
   selectedCode,
   onChange,
 }: {
+  kind: FilterKind;
   label: string;
   options: CatalogOption[];
   selectedCode?: string;
@@ -332,42 +490,57 @@ function FilterGroup({
   return (
     <View style={styles.filterGroup}>
       <Text style={styles.filterLabel}>{label}</Text>
-      <View style={styles.filterOptions}>
+      <ScrollView
+        horizontal
+        contentContainerStyle={styles.filterOptions}
+        showsHorizontalScrollIndicator={false}>
         <FilterChip
+          colors={getNeutralColors()}
           label="Todos"
           selected={!selectedCode}
           onPress={() => onChange(undefined)}
         />
         {options.map(option => (
           <FilterChip
+            colors={getFilterColors(kind, option.code)}
             key={option.code}
             label={option.name}
             selected={selectedCode === option.code}
             onPress={() => onChange(option.code)}
           />
         ))}
-      </View>
+      </ScrollView>
     </View>
   );
 }
 
 function FilterChip({
+  colors,
   label,
   selected,
   onPress,
 }: {
+  colors: BadgeColors;
   label: string;
   selected: boolean;
   onPress: () => void;
 }) {
   return (
     <Pressable
-      style={[styles.filterChip, selected ? styles.filterChipSelected : null]}
+      style={[
+        styles.filterChip,
+        selected
+          ? {
+              backgroundColor: colors.backgroundColor,
+              borderColor: colors.borderColor,
+            }
+          : null,
+      ]}
       onPress={onPress}>
       <Text
         style={[
           styles.filterChipText,
-          selected ? styles.filterChipTextSelected : null,
+          selected ? {color: colors.color} : null,
         ]}>
         {label}
       </Text>
@@ -376,295 +549,50 @@ function FilterChip({
 }
 
 function TaskCard({task, onPress}: {task: TaskItem; onPress: () => void}) {
+  const priorityColors = getPriorityColors(task.priorityCode);
+  const statusColors = getStatusColors(task.statusCode);
+
   return (
     <Pressable
       style={({pressed}) => [styles.card, pressed ? styles.cardPressed : null]}
       onPress={onPress}>
       <View style={styles.cardHeader}>
-        <Text style={styles.cardTitle}>{task.title}</Text>
-        <Text style={styles.taskId}>#{task.id}</Text>
+        <View style={styles.cardTitleGroup}>
+          <Text numberOfLines={2} style={styles.cardTitle}>
+            {task.title}
+          </Text>
+          <Text style={styles.taskId}>#{task.id}</Text>
+        </View>
+        <Text style={styles.openDetailText}>Detalle</Text>
       </View>
-      <Text style={styles.description}>{task.description}</Text>
+      <Text numberOfLines={2} style={styles.description}>
+        {task.description}
+      </Text>
       <View style={styles.badges}>
-        <Badge label={task.priorityName} tone="priority" />
-        <Badge label={task.statusName} tone="status" />
+        <Badge colors={priorityColors} label={task.priorityName} />
+        <Badge colors={statusColors} label={task.statusName} />
       </View>
     </Pressable>
   );
 }
 
-function Badge({label, tone}: {label: string; tone: 'priority' | 'status'}) {
+function Badge({colors, label}: {colors: BadgeColors; label: string}) {
   return (
     <View
       style={[
         styles.badge,
-        tone === 'priority' ? styles.priority : styles.status,
+        {
+          backgroundColor: colors.backgroundColor,
+          borderColor: colors.borderColor,
+        },
       ]}>
-      <Text style={styles.badgeText}>{label}</Text>
+      <Text style={[styles.badgeText, {color: colors.color}]}>{label}</Text>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#F7F8FA',
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 18,
-    paddingBottom: 12,
-  },
-  title: {
-    color: '#111827',
-    fontSize: 28,
-    fontWeight: '700',
-  },
-  subtitle: {
-    color: '#6B7280',
-    fontSize: 14,
-    marginTop: 4,
-  },
-  detailScreen: {
-    flex: 1,
-  },
-  detailHeader: {
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderColor: '#E5E7EB',
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-  },
-  backButton: {
-    borderRadius: 8,
-    paddingHorizontal: 4,
-    paddingVertical: 6,
-  },
-  backText: {
-    color: '#1D4ED8',
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  detailHeaderTitle: {
-    color: '#111827',
-    flex: 1,
-    fontSize: 17,
-    fontWeight: '700',
-    marginRight: 45,
-    textAlign: 'center',
-  },
-  detailContent: {
-    padding: 20,
-  },
-  detailId: {
-    color: '#6B7280',
-    fontSize: 13,
-    fontWeight: '700',
-    marginBottom: 8,
-  },
-  detailTitle: {
-    color: '#111827',
-    fontSize: 24,
-    fontWeight: '700',
-    lineHeight: 30,
-  },
-  detailSection: {
-    borderTopWidth: 1,
-    borderColor: '#E5E7EB',
-    marginTop: 24,
-    paddingTop: 18,
-  },
-  detailLabel: {
-    color: '#6B7280',
-    fontSize: 12,
-    fontWeight: '700',
-    marginBottom: 8,
-    textTransform: 'uppercase',
-  },
-  detailDescription: {
-    color: '#374151',
-    fontSize: 16,
-    lineHeight: 24,
-  },
-  detailRows: {
-    borderTopWidth: 1,
-    borderColor: '#E5E7EB',
-    marginTop: 24,
-  },
-  infoRow: {
-    borderBottomWidth: 1,
-    borderColor: '#E5E7EB',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 14,
-  },
-  infoLabel: {
-    color: '#6B7280',
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  infoValue: {
-    color: '#111827',
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  filterPanel: {
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: '#E5E7EB',
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  filterHeader: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 10,
-  },
-  filterTitle: {
-    color: '#111827',
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  clearText: {
-    color: '#1D4ED8',
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  filterGroup: {
-    marginTop: 8,
-  },
-  filterLabel: {
-    color: '#6B7280',
-    fontSize: 12,
-    fontWeight: '700',
-    marginBottom: 8,
-    textTransform: 'uppercase',
-  },
-  filterOptions: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  filterChip: {
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-  },
-  filterChipSelected: {
-    backgroundColor: '#111827',
-    borderColor: '#111827',
-  },
-  filterChipText: {
-    color: '#374151',
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  filterChipTextSelected: {
-    color: '#FFFFFF',
-  },
-  filterError: {
-    color: '#991B1B',
-    fontSize: 13,
-    marginTop: 10,
-  },
-  listContent: {
-    padding: 16,
-    paddingBottom: 28,
-  },
-  card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    padding: 16,
-    marginBottom: 12,
-  },
-  cardPressed: {
-    borderColor: '#93C5FD',
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    gap: 12,
-    justifyContent: 'space-between',
-  },
-  cardTitle: {
-    color: '#111827',
-    flex: 1,
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  taskId: {
-    color: '#9CA3AF',
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  description: {
-    color: '#4B5563',
-    fontSize: 14,
-    lineHeight: 20,
-    marginTop: 8,
-  },
-  badges: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginTop: 14,
-  },
-  badge: {
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-  },
-  priority: {
-    backgroundColor: '#DBEAFE',
-  },
-  status: {
-    backgroundColor: '#DCFCE7',
-  },
-  badgeText: {
-    color: '#111827',
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  centerState: {
-    alignItems: 'center',
-    flex: 1,
-    justifyContent: 'center',
-    padding: 24,
-  },
-  emptyState: {
-    alignItems: 'center',
-    padding: 24,
-  },
-  stateText: {
-    color: '#6B7280',
-    fontSize: 15,
-    lineHeight: 22,
-    marginTop: 10,
-    textAlign: 'center',
-  },
-  errorTitle: {
-    color: '#991B1B',
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  retryButton: {
-    backgroundColor: '#1D4ED8',
-    borderRadius: 8,
-    marginTop: 18,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-  },
-  retryText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '700',
-  },
-});
+function getFilterColors(kind: FilterKind, code: string): BadgeColors {
+  return kind === 'status' ? getStatusColors(code) : getPriorityColors(code);
+}
 
 export default App;
