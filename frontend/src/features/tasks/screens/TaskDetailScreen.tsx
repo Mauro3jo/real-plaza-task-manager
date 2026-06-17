@@ -1,40 +1,29 @@
 import React from 'react';
-import {Pressable, ScrollView, Text, View} from 'react-native';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {ScrollView, Text, View} from 'react-native';
 import {Badge} from '../../../components/Badge';
 import {StateView} from '../../../components/StateViews';
-import {TaskItem} from '../../../domain/task';
+import {RootStackParamList} from '../../../navigation/types';
 import {
   getPriorityColors,
   getStatusColors,
   styles,
 } from '../../../styles/appStyles';
+import {useTaskDetail} from '../hooks/useTaskDetail';
 
-type TaskDetailScreenProps = {
-  error: string | null;
-  isLoading: boolean;
-  task: TaskItem | null;
-  taskId: number;
-  onBack: () => void;
-  onRetry: () => void;
-};
+type TaskDetailScreenProps = NativeStackScreenProps<
+  RootStackParamList,
+  'TaskDetail'
+>;
 
 export function TaskDetailScreen({
-  error,
-  isLoading,
-  task,
-  taskId,
-  onBack,
-  onRetry,
+  route,
 }: TaskDetailScreenProps) {
+  const {taskId} = route.params;
+  const {task, isLoading, error, loadTaskDetail} = useTaskDetail(taskId);
+
   return (
     <View style={styles.detailScreen}>
-      <View style={styles.detailHeader}>
-        <Pressable style={styles.backButton} onPress={onBack}>
-          <Text style={styles.backText}>Volver</Text>
-        </Pressable>
-        <Text style={styles.detailHeaderTitle}>Detalle</Text>
-      </View>
-
       {isLoading ? (
         <StateView message="Cargando detalle..." />
       ) : error ? (
@@ -42,7 +31,7 @@ export function TaskDetailScreen({
           message={error}
           title="No se pudo cargar"
           actionLabel="Reintentar"
-          onAction={onRetry}
+          onAction={loadTaskDetail}
         />
       ) : task ? (
         <ScrollView contentContainerStyle={styles.detailContent}>

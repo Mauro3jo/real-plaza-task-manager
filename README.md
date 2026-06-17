@@ -37,6 +37,7 @@ frontend/
     components/           componentes reutilizables
     domain/               tipos del contrato
     features/tasks/       pantallas, hooks y componentes de tareas
+    navigation/           stack y tipos de rutas
     styles/               estilos de la app
   android/
 

@@ -1,17 +1,20 @@
 import React, {useMemo, useState} from 'react';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {FlatList, RefreshControl, Text, View} from 'react-native';
 import {EmptyList, StateView} from '../../../components/StateViews';
+import {RootStackParamList} from '../../../navigation/types';
 import {TaskCard} from '../components/TaskCard';
 import {TaskFilters} from '../components/TaskFilters';
 import {useFilterOptions} from '../hooks/useFilterOptions';
 import {useTasks} from '../hooks/useTasks';
 import {styles} from '../../../styles/appStyles';
 
-type TaskListScreenProps = {
-  onOpenTask: (id: number) => void;
-};
+type TaskListScreenProps = NativeStackScreenProps<
+  RootStackParamList,
+  'TaskList'
+>;
 
-export function TaskListScreen({onOpenTask}: TaskListScreenProps) {
+export function TaskListScreen({navigation}: TaskListScreenProps) {
   const [selectedStatus, setSelectedStatus] = useState<string>();
   const [selectedPriority, setSelectedPriority] = useState<string>();
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
@@ -97,7 +100,15 @@ export function TaskListScreen({onOpenTask}: TaskListScreenProps) {
             <EmptyList hasActiveFilters={hasActiveFilters} />
           }
           renderItem={({item}) => (
-            <TaskCard task={item} onPress={() => onOpenTask(item.id)} />
+            <TaskCard
+              task={item}
+              onPress={() =>
+                navigation.navigate('TaskDetail', {
+                  taskId: item.id,
+                  title: item.title,
+                })
+              }
+            />
           )}
         />
       )}

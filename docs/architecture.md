@@ -62,10 +62,11 @@ src/features/tasks/
   components/            cards y filtros
   hooks/                 carga de tareas, filtros y detalle
   screens/               listado y detalle
+src/navigation/          stack principal y tipos de rutas
 src/styles/              estilos y colores
 ```
 
-No se usa UI Kit. Los componentes son propios y consumen la API real: listado, filtros y detalle.
+No se usa UI Kit. Los componentes son propios y consumen la API real: listado, filtros y detalle. La navegaciÃ³n entre pantallas queda en un stack de React Navigation.
 
 ## Cosas que decidí
 

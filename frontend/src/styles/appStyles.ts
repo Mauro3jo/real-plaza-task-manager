@@ -65,10 +65,6 @@ export function getNeutralColors(): BadgeColors {
 }
 
 export const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#F6F7F9',
-  },
   header: {
     alignItems: 'flex-start',
     flexDirection: 'row',
@@ -329,34 +325,6 @@ export const styles = StyleSheet.create({
   },
   detailScreen: {
     flex: 1,
-  },
-  detailHeader: {
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderColor: '#E5E7EB',
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-  },
-  backButton: {
-    backgroundColor: '#EFF6FF',
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-  },
-  backText: {
-    color: '#1D4ED8',
-    fontSize: 14,
-    fontWeight: '800',
-  },
-  detailHeaderTitle: {
-    color: '#111827',
-    flex: 1,
-    fontSize: 17,
-    fontWeight: '800',
-    marginRight: 65,
-    textAlign: 'center',
   },
   detailContent: {
     padding: 16,
