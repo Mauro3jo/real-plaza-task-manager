@@ -38,6 +38,35 @@ sequenceDiagram
     API-->>Client: JSON
 ```
 
+## Comunicación app/API/DB
+
+```mermaid
+flowchart LR
+    RN[React Native app] -->|HTTP JSON| API[.NET API]
+    API --> APP[Application]
+    APP --> REPO[Infrastructure / Dapper]
+    REPO -->|stored procedures| DB[(SQL Server)]
+```
+
+En Android, la app usa `10.0.2.2:5080` para llegar al backend local. En el código quedó separado en `frontend/src/config/env.ts`.
+
+## Frontend
+
+La app quedó organizada por feature para que no dependa todo de `App.tsx`:
+
+```text
+src/api/                 cliente HTTP y endpoints
+src/components/          UI compartida
+src/domain/              tipos del contrato
+src/features/tasks/
+  components/            cards y filtros
+  hooks/                 carga de tareas, filtros y detalle
+  screens/               listado y detalle
+src/styles/              estilos y colores
+```
+
+No se usa UI Kit. Los componentes son propios y consumen la API real: listado, filtros y detalle.
+
 ## Cosas que decidí
 
 ### Stored procedures

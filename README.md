@@ -1,12 +1,13 @@
 # Real Plaza Task Manager
 
-Backend para el reto técnico de Real Plaza.
+Solución fullstack para el reto técnico de Real Plaza.
 
-Permite listar tareas, filtrar por estado/prioridad y ver el detalle de una tarea. La API usa SQL Server y consulta la base con procedimientos almacenados.
+Permite listar tareas, filtrar por estado/prioridad y ver el detalle de una tarea desde una app React Native conectada a una API .NET. La API usa SQL Server y consulta la base con procedimientos almacenados.
 
 ## Stack
 
 - .NET 8 Web API
+- React Native CLI 0.74 + TypeScript
 - SQL Server
 - Dapper
 - Swagger
@@ -27,6 +28,17 @@ backend/
 database/
   01_schema_and_seed.sql
   02_stored_procedures.sql
+
+frontend/
+  App.tsx
+  src/
+    api/                  cliente HTTP y endpoints
+    config/               URL base por plataforma
+    components/           componentes reutilizables
+    domain/               tipos del contrato
+    features/tasks/       pantallas, hooks y componentes de tareas
+    styles/               estilos de la app
+  android/
 
 docs/
   architecture.md
@@ -71,6 +83,30 @@ Swagger:
 http://localhost:5080/swagger
 ```
 
+## Ejecutar frontend
+
+Instalar dependencias:
+
+```powershell
+cd frontend
+npm install
+```
+
+Levantar Metro:
+
+```powershell
+npm start
+```
+
+En otra terminal, con el emulador Android abierto:
+
+```powershell
+cd frontend
+npm run android -- --no-packager
+```
+
+La app usa `http://10.0.2.2:5080` en el emulador Android para llegar al backend local. En iOS usa `http://localhost:5080`.
+
 ## Endpoints
 
 ```text
@@ -94,6 +130,8 @@ priority: LOW, MEDIUM, HIGH
 
 ```powershell
 dotnet test backend\tests\TaskManager.UnitTests\TaskManager.UnitTests.csproj
+cd frontend
+npm run tsc
 ```
 
 ## Notas técnicas
