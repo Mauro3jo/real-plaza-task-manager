@@ -134,6 +134,8 @@ priority: LOW, MEDIUM, HIGH
 dotnet test backend\tests\TaskManager.UnitTests\TaskManager.UnitTests.csproj
 cd frontend
 npm test
+npm run lint
+npm run format:check
 npm run tsc
 ```
 

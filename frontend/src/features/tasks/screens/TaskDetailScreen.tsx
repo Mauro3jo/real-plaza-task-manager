@@ -14,9 +14,7 @@ type TaskDetailScreenProps = NativeStackScreenProps<
   'TaskDetail'
 >;
 
-export function TaskDetailScreen({
-  route,
-}: TaskDetailScreenProps) {
+export function TaskDetailScreen({route}: TaskDetailScreenProps) {
   const {taskId} = route.params;
   const {task, isLoading, error, loadTaskDetail} = useTaskDetail(taskId);
 

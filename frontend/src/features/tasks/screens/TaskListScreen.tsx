@@ -32,7 +32,9 @@ export function TaskListScreen({navigation}: TaskListScreenProps) {
   const {tasks, isLoading, isRefreshing, error, loadTasks} =
     useTasks(taskFilters);
 
-  const activeFilterCount = [selectedStatus, selectedPriority].filter(Boolean).length;
+  const activeFilterCount = [selectedStatus, selectedPriority].filter(
+    Boolean,
+  ).length;
   const hasActiveFilters = activeFilterCount > 0;
 
   const clearFilters = () => {
@@ -48,7 +50,9 @@ export function TaskListScreen({navigation}: TaskListScreenProps) {
           <Text style={styles.subtitle}>
             {isLoading
               ? 'Sincronizando con la API'
-              : `${tasks.length} ${tasks.length === 1 ? 'tarea' : 'tareas'} en vista`}
+              : `${tasks.length} ${
+                  tasks.length === 1 ? 'tarea' : 'tareas'
+                } en vista`}
           </Text>
         </View>
         <View style={styles.apiPill}>
@@ -98,9 +102,7 @@ export function TaskListScreen({navigation}: TaskListScreenProps) {
               tintColor={theme.colors.primary}
             />
           }
-          ListEmptyComponent={
-            <EmptyList hasActiveFilters={hasActiveFilters} />
-          }
+          ListEmptyComponent={<EmptyList hasActiveFilters={hasActiveFilters} />}
           renderItem={({item}) => (
             <TaskCard
               task={item}
@@ -133,7 +135,11 @@ function ListHeader({
         <Text style={styles.listTitle}>Listado</Text>
         <Text style={styles.listSubtitle}>
           {hasActiveFilters
-            ? `${activeFilterCount} ${activeFilterCount === 1 ? 'filtro aplicado' : 'filtros aplicados'}`
+            ? `${activeFilterCount} ${
+                activeFilterCount === 1
+                  ? 'filtro aplicado'
+                  : 'filtros aplicados'
+              }`
             : 'Todas las tareas'}
         </Text>
       </View>
