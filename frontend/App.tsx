@@ -1,4 +1,4 @@
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useMemo, useState} from 'react';
 import {
   FlatList,
   Pressable,
@@ -9,13 +9,13 @@ import {
   Text,
   View,
 } from 'react-native';
-import {getTaskById} from './src/api/tasksApi';
 import {Badge} from './src/components/Badge';
 import {EmptyList, StateView} from './src/components/StateViews';
 import {TaskItem} from './src/domain/task';
 import {TaskCard} from './src/features/tasks/components/TaskCard';
 import {TaskFilters} from './src/features/tasks/components/TaskFilters';
 import {useFilterOptions} from './src/features/tasks/hooks/useFilterOptions';
+import {useTaskDetail} from './src/features/tasks/hooks/useTaskDetail';
 import {useTasks} from './src/features/tasks/hooks/useTasks';
 import {
   getPriorityColors,
@@ -27,11 +27,15 @@ function App(): React.JSX.Element {
   const [selectedStatus, setSelectedStatus] = useState<string>();
   const [selectedPriority, setSelectedPriority] = useState<string>();
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
-  const [selectedTask, setSelectedTask] = useState<TaskItem | null>(null);
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
-  const [isDetailLoading, setIsDetailLoading] = useState(false);
-  const [detailError, setDetailError] = useState<string | null>(null);
   const {filterOptions, filtersError} = useFilterOptions();
+  const {
+    task: selectedTask,
+    isLoading: isDetailLoading,
+    error: detailError,
+    loadTaskDetail,
+    clearTaskDetail,
+  } = useTaskDetail(selectedTaskId);
 
   const taskFilters = useMemo(
     () => ({
@@ -46,23 +50,6 @@ function App(): React.JSX.Element {
   const activeFilterCount = [selectedStatus, selectedPriority].filter(Boolean).length;
   const hasActiveFilters = activeFilterCount > 0;
 
-  const loadTaskDetail = useCallback(async (id: number) => {
-    setIsDetailLoading(true);
-    setDetailError(null);
-    setSelectedTask(null);
-
-    try {
-      const result = await getTaskById(id);
-      setSelectedTask(result);
-    } catch (err) {
-      setDetailError(
-        err instanceof Error ? err.message : 'No se pudo cargar el detalle.',
-      );
-    } finally {
-      setIsDetailLoading(false);
-    }
-  }, []);
-
   const clearFilters = () => {
     setSelectedStatus(undefined);
     setSelectedPriority(undefined);
@@ -70,13 +57,11 @@ function App(): React.JSX.Element {
 
   const openTaskDetail = (id: number) => {
     setSelectedTaskId(id);
-    loadTaskDetail(id);
   };
 
   const closeTaskDetail = () => {
     setSelectedTaskId(null);
-    setSelectedTask(null);
-    setDetailError(null);
+    clearTaskDetail();
   };
 
   const taskId = selectedTaskId;
@@ -91,7 +76,7 @@ function App(): React.JSX.Element {
           task={selectedTask}
           taskId={taskId}
           onBack={closeTaskDetail}
-          onRetry={() => loadTaskDetail(taskId)}
+          onRetry={loadTaskDetail}
         />
       </SafeAreaView>
     );
