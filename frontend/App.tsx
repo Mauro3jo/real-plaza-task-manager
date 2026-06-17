@@ -10,38 +10,77 @@ import {
   Text,
   View,
 } from 'react-native';
-import {getTasks} from './src/api/tasksApi';
-import {TaskItem} from './src/domain/task';
+import {getFilterOptions, getTasks} from './src/api/tasksApi';
+import {CatalogOption, FilterOptions, TaskItem} from './src/domain/task';
+
+const emptyFilterOptions: FilterOptions = {
+  priorities: [],
+  statuses: [],
+};
 
 function App(): React.JSX.Element {
   const [tasks, setTasks] = useState<TaskItem[]>([]);
+  const [filterOptions, setFilterOptions] =
+    useState<FilterOptions>(emptyFilterOptions);
+  const [selectedStatus, setSelectedStatus] = useState<string>();
+  const [selectedPriority, setSelectedPriority] = useState<string>();
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [filtersError, setFiltersError] = useState<string | null>(null);
 
-  const loadTasks = useCallback(async (refreshing = false) => {
-    if (refreshing) {
-      setIsRefreshing(true);
-    } else {
-      setIsLoading(true);
-    }
+  const hasActiveFilters = Boolean(selectedStatus || selectedPriority);
 
-    setError(null);
-
+  const loadFilterOptions = useCallback(async () => {
     try {
-      const result = await getTasks();
-      setTasks(result);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'No se pudo cargar la lista.');
-    } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
+      const result = await getFilterOptions();
+      setFilterOptions(result);
+      setFiltersError(null);
+    } catch {
+      setFiltersError('No se pudieron cargar los filtros.');
     }
   }, []);
+
+  const loadTasks = useCallback(
+    async (refreshing = false) => {
+      if (refreshing) {
+        setIsRefreshing(true);
+      } else {
+        setIsLoading(true);
+      }
+
+      setError(null);
+
+      try {
+        const result = await getTasks({
+          status: selectedStatus,
+          priority: selectedPriority,
+        });
+        setTasks(result);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : 'No se pudo cargar la lista.',
+        );
+      } finally {
+        setIsLoading(false);
+        setIsRefreshing(false);
+      }
+    },
+    [selectedPriority, selectedStatus],
+  );
+
+  useEffect(() => {
+    loadFilterOptions();
+  }, [loadFilterOptions]);
 
   useEffect(() => {
     loadTasks();
   }, [loadTasks]);
+
+  const clearFilters = () => {
+    setSelectedStatus(undefined);
+    setSelectedPriority(undefined);
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -50,6 +89,17 @@ function App(): React.JSX.Element {
         <Text style={styles.title}>Mis tareas</Text>
         <Text style={styles.subtitle}>Datos desde la API .NET</Text>
       </View>
+
+      <FilterPanel
+        filterOptions={filterOptions}
+        filtersError={filtersError}
+        hasActiveFilters={hasActiveFilters}
+        selectedPriority={selectedPriority}
+        selectedStatus={selectedStatus}
+        onChangePriority={setSelectedPriority}
+        onChangeStatus={setSelectedStatus}
+        onClear={clearFilters}
+      />
 
       {isLoading ? (
         <View style={styles.centerState}>
@@ -76,14 +126,125 @@ function App(): React.JSX.Element {
             />
           }
           ListEmptyComponent={
-            <View style={styles.centerState}>
-              <Text style={styles.stateText}>No hay tareas para mostrar.</Text>
+            <View style={styles.emptyState}>
+              <Text style={styles.stateText}>
+                {hasActiveFilters
+                  ? 'No hay tareas con estos filtros.'
+                  : 'No hay tareas para mostrar.'}
+              </Text>
             </View>
           }
           renderItem={({item}) => <TaskCard task={item} />}
         />
       )}
     </SafeAreaView>
+  );
+}
+
+function FilterPanel({
+  filterOptions,
+  filtersError,
+  hasActiveFilters,
+  selectedPriority,
+  selectedStatus,
+  onChangePriority,
+  onChangeStatus,
+  onClear,
+}: {
+  filterOptions: FilterOptions;
+  filtersError: string | null;
+  hasActiveFilters: boolean;
+  selectedPriority?: string;
+  selectedStatus?: string;
+  onChangePriority: (code?: string) => void;
+  onChangeStatus: (code?: string) => void;
+  onClear: () => void;
+}) {
+  return (
+    <View style={styles.filterPanel}>
+      <View style={styles.filterHeader}>
+        <Text style={styles.filterTitle}>Filtros</Text>
+        {hasActiveFilters ? (
+          <Pressable onPress={onClear}>
+            <Text style={styles.clearText}>Limpiar</Text>
+          </Pressable>
+        ) : null}
+      </View>
+
+      <FilterGroup
+        label="Estado"
+        options={filterOptions.statuses}
+        selectedCode={selectedStatus}
+        onChange={onChangeStatus}
+      />
+      <FilterGroup
+        label="Prioridad"
+        options={filterOptions.priorities}
+        selectedCode={selectedPriority}
+        onChange={onChangePriority}
+      />
+
+      {filtersError ? (
+        <Text style={styles.filterError}>{filtersError}</Text>
+      ) : null}
+    </View>
+  );
+}
+
+function FilterGroup({
+  label,
+  options,
+  selectedCode,
+  onChange,
+}: {
+  label: string;
+  options: CatalogOption[];
+  selectedCode?: string;
+  onChange: (code?: string) => void;
+}) {
+  return (
+    <View style={styles.filterGroup}>
+      <Text style={styles.filterLabel}>{label}</Text>
+      <View style={styles.filterOptions}>
+        <FilterChip
+          label="Todos"
+          selected={!selectedCode}
+          onPress={() => onChange(undefined)}
+        />
+        {options.map(option => (
+          <FilterChip
+            key={option.code}
+            label={option.name}
+            selected={selectedCode === option.code}
+            onPress={() => onChange(option.code)}
+          />
+        ))}
+      </View>
+    </View>
+  );
+}
+
+function FilterChip({
+  label,
+  selected,
+  onPress,
+}: {
+  label: string;
+  selected: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      style={[styles.filterChip, selected ? styles.filterChipSelected : null]}
+      onPress={onPress}>
+      <Text
+        style={[
+          styles.filterChipText,
+          selected ? styles.filterChipTextSelected : null,
+        ]}>
+        {label}
+      </Text>
+    </Pressable>
   );
 }
 
@@ -105,7 +266,11 @@ function TaskCard({task}: {task: TaskItem}) {
 
 function Badge({label, tone}: {label: string; tone: 'priority' | 'status'}) {
   return (
-    <View style={[styles.badge, tone === 'priority' ? styles.priority : styles.status]}>
+    <View
+      style={[
+        styles.badge,
+        tone === 'priority' ? styles.priority : styles.status,
+      ]}>
       <Text style={styles.badgeText}>{label}</Text>
     </View>
   );
@@ -130,6 +295,69 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     fontSize: 14,
     marginTop: 4,
+  },
+  filterPanel: {
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: '#E5E7EB',
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  filterHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  filterTitle: {
+    color: '#111827',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  clearText: {
+    color: '#1D4ED8',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  filterGroup: {
+    marginTop: 8,
+  },
+  filterLabel: {
+    color: '#6B7280',
+    fontSize: 12,
+    fontWeight: '700',
+    marginBottom: 8,
+    textTransform: 'uppercase',
+  },
+  filterOptions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  filterChip: {
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+  },
+  filterChipSelected: {
+    backgroundColor: '#111827',
+    borderColor: '#111827',
+  },
+  filterChipText: {
+    color: '#374151',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  filterChipTextSelected: {
+    color: '#FFFFFF',
+  },
+  filterError: {
+    color: '#991B1B',
+    fontSize: 13,
+    marginTop: 10,
   },
   listContent: {
     padding: 16,
@@ -191,6 +419,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
     justifyContent: 'center',
+    padding: 24,
+  },
+  emptyState: {
+    alignItems: 'center',
     padding: 24,
   },
   stateText: {

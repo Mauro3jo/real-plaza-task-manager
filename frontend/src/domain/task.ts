@@ -7,3 +7,18 @@ export type TaskItem = {
   statusCode: string;
   statusName: string;
 };
+
+export type CatalogOption = {
+  code: string;
+  name: string;
+};
+
+export type FilterOptions = {
+  priorities: CatalogOption[];
+  statuses: CatalogOption[];
+};
+
+export type TaskFilters = {
+  status?: string;
+  priority?: string;
+};

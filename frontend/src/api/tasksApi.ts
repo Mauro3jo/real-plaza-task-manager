@@ -1,5 +1,5 @@
 import {API_BASE_URL} from '../config/env';
-import {TaskItem} from '../domain/task';
+import {FilterOptions, TaskFilters, TaskItem} from '../domain/task';
 
 type ProblemDetails = {
   title?: string;
@@ -23,6 +23,25 @@ async function request<T>(path: string): Promise<T> {
   return (await response.json()) as T;
 }
 
-export function getTasks(): Promise<TaskItem[]> {
-  return request<TaskItem[]>('/api/tasks');
+function buildTaskPath(filters: TaskFilters): string {
+  const query = new URLSearchParams();
+
+  if (filters.status) {
+    query.append('status', filters.status);
+  }
+
+  if (filters.priority) {
+    query.append('priority', filters.priority);
+  }
+
+  const queryString = query.toString();
+  return queryString ? `/api/tasks?${queryString}` : '/api/tasks';
+}
+
+export function getTasks(filters: TaskFilters = {}): Promise<TaskItem[]> {
+  return request<TaskItem[]>(buildTaskPath(filters));
+}
+
+export function getFilterOptions(): Promise<FilterOptions> {
+  return request<FilterOptions>('/api/catalog/filter-options');
 }
