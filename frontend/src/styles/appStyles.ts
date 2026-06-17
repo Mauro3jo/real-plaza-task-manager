@@ -1,200 +1,139 @@
 import {StyleSheet} from 'react-native';
+import {theme} from '../theme/theme';
 
-export type BadgeColors = {
-  backgroundColor: string;
-  borderColor: string;
-  color: string;
-};
-
-export function getPriorityColors(code: string): BadgeColors {
-  switch (code) {
-    case 'HIGH':
-      return {
-        backgroundColor: '#FEE2E2',
-        borderColor: '#FCA5A5',
-        color: '#7F1D1D',
-      };
-    case 'MEDIUM':
-      return {
-        backgroundColor: '#FEF3C7',
-        borderColor: '#FCD34D',
-        color: '#78350F',
-      };
-    case 'LOW':
-      return {
-        backgroundColor: '#E0F2FE',
-        borderColor: '#7DD3FC',
-        color: '#075985',
-      };
-    default:
-      return getNeutralColors();
-  }
-}
-
-export function getStatusColors(code: string): BadgeColors {
-  switch (code) {
-    case 'DONE':
-      return {
-        backgroundColor: '#DCFCE7',
-        borderColor: '#86EFAC',
-        color: '#14532D',
-      };
-    case 'IN_PROGRESS':
-      return {
-        backgroundColor: '#DBEAFE',
-        borderColor: '#93C5FD',
-        color: '#1E3A8A',
-      };
-    case 'PENDING':
-      return {
-        backgroundColor: '#F3E8FF',
-        borderColor: '#D8B4FE',
-        color: '#581C87',
-      };
-    default:
-      return getNeutralColors();
-  }
-}
-
-export function getNeutralColors(): BadgeColors {
-  return {
-    backgroundColor: '#F1F5F9',
-    borderColor: '#CBD5E1',
-    color: '#334155',
-  };
-}
+const {colors, font, fontWeight, lineHeight, radius, spacing} = theme;
 
 export const styles = StyleSheet.create({
   filterPanel: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: colors.border,
     borderTopWidth: 1,
-    paddingBottom: 10,
-    paddingHorizontal: 16,
-    paddingTop: 10,
+    paddingBottom: spacing.lg,
+    paddingHorizontal: spacing.screen,
+    paddingTop: spacing.lg,
   },
   filterBar: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: 8,
+    gap: spacing.md,
   },
   filterToggle: {
     alignItems: 'center',
-    backgroundColor: '#111827',
-    borderRadius: 8,
+    backgroundColor: colors.textPrimary,
+    borderRadius: radius.sm,
     flexDirection: 'row',
-    gap: 7,
-    paddingHorizontal: 12,
-    paddingVertical: 9,
+    gap: spacing.sm + 1,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.md + 1,
   },
   filterToggleText: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '800',
+    color: colors.surface,
+    fontSize: font.sm,
+    fontWeight: fontWeight.strong,
   },
   filterCountBadge: {
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 999,
+    backgroundColor: colors.surface,
+    borderRadius: radius.pill,
     justifyContent: 'center',
-    minWidth: 18,
-    paddingHorizontal: 5,
+    minWidth: spacing.section,
+    paddingHorizontal: spacing.xs + 1,
   },
   filterCountText: {
-    color: '#111827',
-    fontSize: 11,
-    fontWeight: '800',
+    color: colors.textPrimary,
+    fontSize: font.xxs,
+    fontWeight: fontWeight.strong,
   },
   activeFilters: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: 8,
-    paddingRight: 8,
+    gap: spacing.md,
+    paddingRight: spacing.md,
   },
   activeFilterChip: {
     alignItems: 'center',
-    backgroundColor: '#F8FAFC',
-    borderColor: '#CBD5E1',
-    borderRadius: 999,
+    backgroundColor: colors.surfaceMuted,
+    borderColor: colors.borderStrong,
+    borderRadius: radius.pill,
     borderWidth: 1,
     flexDirection: 'row',
-    gap: 7,
-    paddingHorizontal: 10,
-    paddingVertical: 7,
+    gap: spacing.sm + 1,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm + 1,
   },
   activeFilterText: {
-    color: '#334155',
-    fontSize: 13,
-    fontWeight: '800',
+    color: colors.textBody,
+    fontSize: font.sm,
+    fontWeight: fontWeight.strong,
     maxWidth: 110,
   },
   activeFilterRemove: {
-    color: '#64748B',
-    fontSize: 12,
-    fontWeight: '800',
+    color: colors.textSecondary,
+    fontSize: font.xs,
+    fontWeight: fontWeight.strong,
   },
   noFiltersText: {
-    color: '#64748B',
-    fontSize: 13,
+    color: colors.textSecondary,
+    fontSize: font.sm,
   },
   clearInlineButton: {
-    paddingHorizontal: 2,
-    paddingVertical: 8,
+    paddingHorizontal: spacing.xxs,
+    paddingVertical: spacing.md,
   },
   clearInlineText: {
-    color: '#2563EB',
-    fontSize: 13,
-    fontWeight: '800',
+    color: colors.primary,
+    fontSize: font.sm,
+    fontWeight: fontWeight.strong,
   },
   filterSheet: {
     borderTopWidth: 1,
-    borderColor: '#EEF2F7',
-    marginTop: 12,
-    paddingTop: 10,
+    borderColor: colors.borderSoft,
+    marginTop: spacing.xl,
+    paddingTop: spacing.lg,
   },
   filterGroup: {
-    marginTop: 8,
+    marginTop: spacing.md,
   },
   filterLabel: {
-    color: '#64748B',
-    fontSize: 12,
-    fontWeight: '800',
-    marginBottom: 8,
+    color: colors.textSecondary,
+    fontSize: font.xs,
+    fontWeight: fontWeight.strong,
+    marginBottom: spacing.md,
     textTransform: 'uppercase',
   },
   filterOptions: {
     flexDirection: 'row',
-    gap: 8,
-    paddingRight: 16,
+    gap: spacing.md,
+    paddingRight: spacing.screen,
   },
   filterChip: {
-    backgroundColor: '#F8FAFC',
-    borderColor: '#CBD5E1',
-    borderRadius: 999,
+    backgroundColor: colors.surfaceMuted,
+    borderColor: colors.borderStrong,
+    borderRadius: radius.pill,
     borderWidth: 1,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.md,
   },
   filterChipText: {
-    color: '#334155',
-    fontSize: 13,
-    fontWeight: '800',
+    color: colors.textBody,
+    fontSize: font.sm,
+    fontWeight: fontWeight.strong,
   },
   filterError: {
-    color: '#991B1B',
-    fontSize: 13,
-    marginTop: 10,
+    color: colors.danger,
+    fontSize: font.sm,
+    marginTop: spacing.lg,
   },
   card: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#E5E7EB',
-    borderRadius: 8,
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: radius.sm,
     borderWidth: 1,
     elevation: 1,
-    marginBottom: 10,
-    padding: 16,
-    shadowColor: '#0F172A',
+    marginBottom: spacing.lg,
+    padding: spacing.screen,
+    shadowColor: colors.shadow,
     shadowOffset: {
       width: 0,
       height: 1,
@@ -203,94 +142,94 @@ export const styles = StyleSheet.create({
     shadowRadius: 3,
   },
   cardPressed: {
-    borderColor: '#93C5FD',
+    borderColor: colors.primarySoft,
   },
   cardHeader: {
     alignItems: 'flex-start',
     flexDirection: 'row',
-    gap: 12,
+    gap: spacing.xl,
     justifyContent: 'space-between',
   },
   cardTitleGroup: {
     flex: 1,
   },
   cardTitle: {
-    color: '#111827',
-    fontSize: 16,
-    fontWeight: '800',
-    lineHeight: 21,
+    color: colors.textPrimary,
+    fontSize: font.xl,
+    fontWeight: fontWeight.strong,
+    lineHeight: lineHeight.cardTitle,
   },
   taskId: {
-    color: '#94A3B8',
-    fontSize: 12,
-    fontWeight: '800',
-    marginTop: 4,
+    color: colors.textMuted,
+    fontSize: font.xs,
+    fontWeight: fontWeight.strong,
+    marginTop: spacing.xs,
   },
   openDetailText: {
-    color: '#2563EB',
-    fontSize: 12,
-    fontWeight: '800',
-    paddingTop: 2,
+    color: colors.primary,
+    fontSize: font.xs,
+    fontWeight: fontWeight.strong,
+    paddingTop: spacing.xxs,
   },
   description: {
-    color: '#475569',
-    fontSize: 14,
-    lineHeight: 20,
-    marginTop: 8,
+    color: colors.textDescription,
+    fontSize: font.md,
+    lineHeight: lineHeight.sm,
+    marginTop: spacing.md,
   },
   badges: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
-    marginTop: 12,
+    gap: spacing.md,
+    marginTop: spacing.xl,
   },
   badge: {
-    borderRadius: 999,
+    borderRadius: radius.pill,
     borderWidth: 1,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.xs + 1,
   },
   badgeText: {
-    fontSize: 12,
-    fontWeight: '800',
+    fontSize: font.xs,
+    fontWeight: fontWeight.strong,
   },
   centerState: {
     alignItems: 'center',
     flex: 1,
     justifyContent: 'center',
-    padding: 24,
+    padding: spacing.state,
   },
   emptyState: {
     alignItems: 'center',
-    padding: 24,
+    padding: spacing.state,
   },
   emptyTitle: {
-    color: '#111827',
-    fontSize: 17,
-    fontWeight: '800',
+    color: colors.textPrimary,
+    fontSize: font.xxl,
+    fontWeight: fontWeight.strong,
   },
   stateText: {
-    color: '#64748B',
-    fontSize: 15,
-    lineHeight: 22,
-    marginTop: 10,
+    color: colors.textSecondary,
+    fontSize: font.lg,
+    lineHeight: lineHeight.body,
+    marginTop: spacing.lg,
     textAlign: 'center',
   },
   errorTitle: {
-    color: '#991B1B',
-    fontSize: 18,
-    fontWeight: '800',
+    color: colors.danger,
+    fontSize: font.xxl + 1,
+    fontWeight: fontWeight.strong,
   },
   retryButton: {
-    backgroundColor: '#2563EB',
-    borderRadius: 8,
-    marginTop: 18,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    backgroundColor: colors.primary,
+    borderRadius: radius.sm,
+    marginTop: spacing.section,
+    paddingHorizontal: spacing.screen,
+    paddingVertical: spacing.lg,
   },
   retryText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '800',
+    color: colors.surface,
+    fontSize: font.md,
+    fontWeight: fontWeight.strong,
   },
 });

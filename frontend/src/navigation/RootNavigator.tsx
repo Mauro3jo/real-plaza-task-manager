@@ -7,6 +7,7 @@ import {
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {TaskDetailScreen} from '../features/tasks/screens/TaskDetailScreen';
 import {TaskListScreen} from '../features/tasks/screens/TaskListScreen';
+import {theme} from '../theme/theme';
 import {RootStackParamList} from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -15,11 +16,11 @@ const navigationTheme: Theme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    background: '#F6F7F9',
-    border: '#E5E7EB',
-    card: '#FFFFFF',
-    primary: '#2563EB',
-    text: '#111827',
+    background: theme.colors.background,
+    border: theme.colors.border,
+    card: theme.colors.surface,
+    primary: theme.colors.primary,
+    text: theme.colors.textPrimary,
   },
 };
 
@@ -28,14 +29,14 @@ export function RootNavigator() {
     <NavigationContainer theme={navigationTheme}>
       <Stack.Navigator
         screenOptions={{
-          contentStyle: {backgroundColor: '#F6F7F9'},
+          contentStyle: {backgroundColor: theme.colors.background},
           headerShadowVisible: false,
-          headerStyle: {backgroundColor: '#FFFFFF'},
-          headerTintColor: '#2563EB',
+          headerStyle: {backgroundColor: theme.colors.surface},
+          headerTintColor: theme.colors.primary,
           headerTitleStyle: {
-            color: '#111827',
-            fontSize: 17,
-            fontWeight: '800',
+            color: theme.colors.textPrimary,
+            fontSize: theme.font.xxl,
+            fontWeight: theme.fontWeight.strong,
           },
         }}>
         <Stack.Screen

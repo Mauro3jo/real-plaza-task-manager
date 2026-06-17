@@ -5,9 +5,9 @@ import {
   getNeutralColors,
   getPriorityColors,
   getStatusColors,
-  styles,
   type BadgeColors,
-} from '../../../styles/appStyles';
+} from '../../../theme/theme';
+import {styles} from '../../../styles/appStyles';
 
 type FilterKind = 'status' | 'priority';
 

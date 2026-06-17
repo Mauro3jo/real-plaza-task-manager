@@ -1,6 +1,7 @@
 import React from 'react';
 import {ActivityIndicator, Pressable, Text, View} from 'react-native';
 import {styles} from '../styles/appStyles';
+import {theme} from '../theme/theme';
 
 type StateViewProps = {
   actionLabel?: string;
@@ -20,7 +21,7 @@ export function StateView({
       {title ? (
         <Text style={styles.errorTitle}>{title}</Text>
       ) : (
-        <ActivityIndicator size="large" color="#2563EB" />
+        <ActivityIndicator size="large" color={theme.colors.primary} />
       )}
       <Text style={styles.stateText}>{message}</Text>
       {actionLabel && onAction ? (

@@ -5,7 +5,7 @@ import {Badge} from '../../../components/Badge';
 import {Screen} from '../../../components/Screen';
 import {StateView} from '../../../components/StateViews';
 import {RootStackParamList} from '../../../navigation/types';
-import {getPriorityColors, getStatusColors} from '../../../styles/appStyles';
+import {getPriorityColors, getStatusColors} from '../../../theme/theme';
 import {useTaskDetail} from '../hooks/useTaskDetail';
 import {styles} from './TaskDetailScreen.styles';
 

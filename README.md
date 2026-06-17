@@ -38,6 +38,7 @@ frontend/
     domain/               tipos del contrato
     features/tasks/       pantallas, hooks y componentes de tareas
     navigation/           stack y tipos de rutas
+    theme/                tokens visuales
     styles/               estilos de la app
   android/
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import {Text, View} from 'react-native';
-import {styles, type BadgeColors} from '../styles/appStyles';
+import {styles} from '../styles/appStyles';
+import {type BadgeColors} from '../theme/theme';
 
 type BadgeProps = {
   colors: BadgeColors;

@@ -6,6 +6,7 @@ import {EmptyList, StateView} from '../../../components/StateViews';
 import {RootStackParamList} from '../../../navigation/types';
 import {TaskCard} from '../components/TaskCard';
 import {TaskFilters} from '../components/TaskFilters';
+import {theme} from '../../../theme/theme';
 import {useFilterOptions} from '../hooks/useFilterOptions';
 import {useTasks} from '../hooks/useTasks';
 import {styles} from './TaskListScreen.styles';
@@ -94,7 +95,7 @@ export function TaskListScreen({navigation}: TaskListScreenProps) {
             <RefreshControl
               refreshing={isRefreshing}
               onRefresh={() => loadTasks(true)}
-              tintColor="#2563EB"
+              tintColor={theme.colors.primary}
             />
           }
           ListEmptyComponent={

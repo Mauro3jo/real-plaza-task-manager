@@ -2,11 +2,8 @@ import React from 'react';
 import {Pressable, Text, View} from 'react-native';
 import {Badge} from '../../../components/Badge';
 import {TaskItem} from '../../../domain/task';
-import {
-  getPriorityColors,
-  getStatusColors,
-  styles,
-} from '../../../styles/appStyles';
+import {styles} from '../../../styles/appStyles';
+import {getPriorityColors, getStatusColors} from '../../../theme/theme';
 
 type TaskCardProps = {
   task: TaskItem;

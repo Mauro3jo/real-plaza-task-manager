@@ -1,6 +1,7 @@
 import React, {PropsWithChildren} from 'react';
 import {StyleProp, StyleSheet, View, ViewStyle} from 'react-native';
 import {SafeAreaView, Edge} from 'react-native-safe-area-context';
+import {theme} from '../theme/theme';
 
 type ScreenProps = PropsWithChildren<{
   contentStyle?: StyleProp<ViewStyle>;
@@ -23,7 +24,7 @@ export function Screen({
 
 const styles = StyleSheet.create({
   safeArea: {
-    backgroundColor: '#F6F7F9',
+    backgroundColor: theme.colors.background,
     flex: 1,
   },
   content: {
