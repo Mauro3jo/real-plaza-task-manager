@@ -18,10 +18,20 @@ app.MapGet("/health", () => Results.Ok(new { status = "ok" }))
     .WithName("Health")
     .WithTags("Health");
 
-app.MapGet("/api/tasks", () => Results.Ok(SampleTasks.GetAll()))
+app.MapGet("/api/tasks", (string? status, string? priority) =>
+    {
+        if (!SampleTasks.IsValidStatus(status))
+            return Results.BadRequest(new { message = "Estado inválido." });
+
+        if (!SampleTasks.IsValidPriority(priority))
+            return Results.BadRequest(new { message = "Prioridad inválida." });
+
+        return Results.Ok(SampleTasks.GetAll(status, priority));
+    })
     .WithName("GetTasks")
     .WithTags("Tasks")
-    .Produces<IReadOnlyList<TaskItemDto>>();
+    .Produces<IReadOnlyList<TaskItemDto>>()
+    .Produces(StatusCodes.Status400BadRequest);
 
 app.MapGet("/api/tasks/{id:int}", (int id) =>
     {

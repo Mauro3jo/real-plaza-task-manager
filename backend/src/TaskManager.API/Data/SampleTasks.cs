@@ -13,8 +13,33 @@ internal static class SampleTasks
         new(5, "Agregar filtros", "Permitir filtrar por estado y prioridad.", "MEDIUM", "Media", "PENDING", "Pendiente")
     ];
 
-    public static IReadOnlyList<TaskItemDto> GetAll() => Items;
+    public static IReadOnlyList<TaskItemDto> GetAll(string? status, string? priority)
+    {
+        var query = Items.AsEnumerable();
+
+        if (!string.IsNullOrWhiteSpace(status))
+        {
+            query = query.Where(task =>
+                string.Equals(task.StatusCode, status.Trim(), StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrWhiteSpace(priority))
+        {
+            query = query.Where(task =>
+                string.Equals(task.PriorityCode, priority.Trim(), StringComparison.OrdinalIgnoreCase));
+        }
+
+        return query.ToList();
+    }
 
     public static TaskItemDto? GetById(int id) =>
         Items.FirstOrDefault(task => task.Id == id);
+
+    public static bool IsValidStatus(string? status) =>
+        string.IsNullOrWhiteSpace(status) ||
+        Items.Any(task => string.Equals(task.StatusCode, status.Trim(), StringComparison.OrdinalIgnoreCase));
+
+    public static bool IsValidPriority(string? priority) =>
+        string.IsNullOrWhiteSpace(priority) ||
+        Items.Any(task => string.Equals(task.PriorityCode, priority.Trim(), StringComparison.OrdinalIgnoreCase));
 }
