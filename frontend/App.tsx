@@ -1,6 +1,5 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {
-  ActivityIndicator,
   FlatList,
   Pressable,
   RefreshControl,
@@ -11,7 +10,10 @@ import {
   View,
 } from 'react-native';
 import {getFilterOptions, getTaskById, getTasks} from './src/api/tasksApi';
+import {Badge} from './src/components/Badge';
+import {EmptyList, StateView} from './src/components/StateViews';
 import {CatalogOption, FilterOptions, TaskItem} from './src/domain/task';
+import {TaskCard} from './src/features/tasks/components/TaskCard';
 import {
   getNeutralColors,
   getPriorityColors,
@@ -236,47 +238,6 @@ function ListHeader({
       <View style={styles.countPill}>
         <Text style={styles.countPillText}>{tasksCount}</Text>
       </View>
-    </View>
-  );
-}
-
-function EmptyList({hasActiveFilters}: {hasActiveFilters: boolean}) {
-  return (
-    <View style={styles.emptyState}>
-      <Text style={styles.emptyTitle}>Sin tareas para mostrar</Text>
-      <Text style={styles.stateText}>
-        {hasActiveFilters
-          ? 'Probá limpiar o cambiar los filtros.'
-          : 'Todavía no hay tareas cargadas.'}
-      </Text>
-    </View>
-  );
-}
-
-function StateView({
-  actionLabel,
-  message,
-  onAction,
-  title,
-}: {
-  actionLabel?: string;
-  message: string;
-  onAction?: () => void;
-  title?: string;
-}) {
-  return (
-    <View style={styles.centerState}>
-      {title ? (
-        <Text style={styles.errorTitle}>{title}</Text>
-      ) : (
-        <ActivityIndicator size="large" color="#2563EB" />
-      )}
-      <Text style={styles.stateText}>{message}</Text>
-      {actionLabel && onAction ? (
-        <Pressable style={styles.retryButton} onPress={onAction}>
-          <Text style={styles.retryText}>{actionLabel}</Text>
-        </Pressable>
-      ) : null}
     </View>
   );
 }
@@ -545,49 +506,6 @@ function FilterChip({
         {label}
       </Text>
     </Pressable>
-  );
-}
-
-function TaskCard({task, onPress}: {task: TaskItem; onPress: () => void}) {
-  const priorityColors = getPriorityColors(task.priorityCode);
-  const statusColors = getStatusColors(task.statusCode);
-
-  return (
-    <Pressable
-      style={({pressed}) => [styles.card, pressed ? styles.cardPressed : null]}
-      onPress={onPress}>
-      <View style={styles.cardHeader}>
-        <View style={styles.cardTitleGroup}>
-          <Text numberOfLines={2} style={styles.cardTitle}>
-            {task.title}
-          </Text>
-          <Text style={styles.taskId}>#{task.id}</Text>
-        </View>
-        <Text style={styles.openDetailText}>Detalle</Text>
-      </View>
-      <Text numberOfLines={2} style={styles.description}>
-        {task.description}
-      </Text>
-      <View style={styles.badges}>
-        <Badge colors={priorityColors} label={task.priorityName} />
-        <Badge colors={statusColors} label={task.statusName} />
-      </View>
-    </Pressable>
-  );
-}
-
-function Badge({colors, label}: {colors: BadgeColors; label: string}) {
-  return (
-    <View
-      style={[
-        styles.badge,
-        {
-          backgroundColor: colors.backgroundColor,
-          borderColor: colors.borderColor,
-        },
-      ]}>
-      <Text style={[styles.badgeText, {color: colors.color}]}>{label}</Text>
-    </View>
   );
 }
 
