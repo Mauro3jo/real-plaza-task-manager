@@ -11,7 +11,7 @@ Permite listar tareas, filtrar por estado/prioridad y ver el detalle de una tare
 - SQL Server
 - Dapper
 - Swagger
-- xUnit para pruebas unitarias
+- xUnit y Jest para pruebas unitarias
 
 ## Estructura
 
@@ -131,6 +131,7 @@ priority: LOW, MEDIUM, HIGH
 ```powershell
 dotnet test backend\tests\TaskManager.UnitTests\TaskManager.UnitTests.csproj
 cd frontend
+npm test
 npm run tsc
 ```
 
