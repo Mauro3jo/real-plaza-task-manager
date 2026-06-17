@@ -36,10 +36,8 @@ internal static class SampleTasks
         Items.FirstOrDefault(task => task.Id == id);
 
     public static bool IsValidStatus(string? status) =>
-        string.IsNullOrWhiteSpace(status) ||
-        Items.Any(task => string.Equals(task.StatusCode, status.Trim(), StringComparison.OrdinalIgnoreCase));
+        SampleCatalog.IsValidStatus(status);
 
     public static bool IsValidPriority(string? priority) =>
-        string.IsNullOrWhiteSpace(priority) ||
-        Items.Any(task => string.Equals(task.PriorityCode, priority.Trim(), StringComparison.OrdinalIgnoreCase));
+        SampleCatalog.IsValidPriority(priority);
 }

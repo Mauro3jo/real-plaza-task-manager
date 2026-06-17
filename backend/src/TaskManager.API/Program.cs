@@ -43,4 +43,9 @@ app.MapGet("/api/tasks/{id:int}", (int id) =>
     .Produces<TaskItemDto>()
     .Produces(StatusCodes.Status404NotFound);
 
+app.MapGet("/api/catalog/filter-options", () => Results.Ok(SampleCatalog.GetFilterOptions()))
+    .WithName("GetFilterOptions")
+    .WithTags("Catalog")
+    .Produces<FilterOptionsDto>();
+
 app.Run();
