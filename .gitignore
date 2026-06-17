@@ -1,0 +1,20 @@
+# .NET
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+.vs/
+TestResults/
+*.trx
+
+# Node / React Native
+node_modules/
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+
+# Local config
+appsettings.*.local.json
+.env
