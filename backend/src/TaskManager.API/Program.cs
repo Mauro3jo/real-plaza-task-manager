@@ -45,11 +45,12 @@ app.MapGet("/api/tasks/{id:int}", async (
         CancellationToken cancellationToken) =>
     {
         var task = await taskService.GetByIdAsync(id, cancellationToken);
-        return task is null ? Results.NotFound() : Results.Ok(task);
+        return Results.Ok(task);
     })
     .WithName("GetTaskById")
     .WithTags("Tasks")
     .Produces<TaskItemDto>()
+    .Produces(StatusCodes.Status400BadRequest)
     .Produces(StatusCodes.Status404NotFound);
 
 app.MapGet("/api/catalog/filter-options", async (

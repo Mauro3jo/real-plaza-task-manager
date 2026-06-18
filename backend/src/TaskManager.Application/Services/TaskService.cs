@@ -37,12 +37,17 @@ public sealed class TaskService : ITaskService
         return tasks.Select(task => task.ToDto()).ToList();
     }
 
-    public async Task<TaskItemDto?> GetByIdAsync(
+    public async Task<TaskItemDto> GetByIdAsync(
         int id,
         CancellationToken cancellationToken = default)
     {
-        var task = await _taskRepository.GetByIdAsync(id, cancellationToken);
-        return task?.ToDto();
+        if (id <= 0)
+            throw new ValidationException("El id de la tarea debe ser mayor a cero.");
+
+        var task = await _taskRepository.GetByIdAsync(id, cancellationToken)
+            ?? throw NotFoundException.ForTask(id);
+
+        return task.ToDto();
     }
 
     private static bool IsValid(string? code, IReadOnlyList<CatalogOption> options) =>

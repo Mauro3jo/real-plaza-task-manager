@@ -93,7 +93,7 @@ La API usa `PENDING`, `DONE`, `HIGH`, etc. Los ids quedan adentro de la base y n
 
 ### Errores
 
-Hay un middleware para no repetir `try/catch` en cada endpoint. Los filtros inválidos salen como `400` y el resto como `500` genérico.
+Hay un middleware para no repetir `try/catch` en cada endpoint. Las validaciones salen como `400`, los recursos inexistentes como `404` y el resto como `500` generico.
 
 ### Tests
 

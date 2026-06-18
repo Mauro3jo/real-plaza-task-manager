@@ -31,13 +31,14 @@ public sealed class TaskServiceTests
     }
 
     [Fact]
-    public async Task GetByIdAsync_returns_null_when_task_does_not_exist()
+    public async Task GetByIdAsync_rejects_missing_task()
     {
         var service = new TaskService(new FakeTaskRepository(), new FakeCatalogRepository());
 
-        var result = await service.GetByIdAsync(999);
+        var exception = await Assert.ThrowsAsync<NotFoundException>(() =>
+            service.GetByIdAsync(999));
 
-        Assert.Null(result);
+        Assert.Contains("999", exception.Message);
     }
 
     private sealed class FakeTaskRepository : ITaskRepository

@@ -33,7 +33,8 @@ public sealed class ExceptionHandlingMiddleware
     {
         var (statusCode, title, detail) = exception switch
         {
-            ValidationException => (HttpStatusCode.BadRequest, "Solicitud inválida", exception.Message),
+            ValidationException => (HttpStatusCode.BadRequest, "Solicitud invalida", exception.Message),
+            NotFoundException => (HttpStatusCode.NotFound, "Recurso no encontrado", exception.Message),
             _ => (HttpStatusCode.InternalServerError, "Error interno", "No se pudo procesar la solicitud.")
         };
 

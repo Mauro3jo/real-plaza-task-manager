@@ -9,7 +9,7 @@ public interface ITaskService
         string? priority,
         CancellationToken cancellationToken = default);
 
-    Task<TaskItemDto?> GetByIdAsync(
+    Task<TaskItemDto> GetByIdAsync(
         int id,
         CancellationToken cancellationToken = default);
 }
