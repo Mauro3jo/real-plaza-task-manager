@@ -9,8 +9,8 @@ IF OBJECT_ID('tasks.usp_Tasks_GetList', 'P') IS NOT NULL
     DROP PROCEDURE tasks.usp_Tasks_GetList;
 GO
 CREATE PROCEDURE tasks.usp_Tasks_GetList
-    @StatusId   TINYINT = NULL,
-    @PriorityId TINYINT = NULL
+    @StatusCode   VARCHAR(20) = NULL,
+    @PriorityCode VARCHAR(20) = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -30,8 +30,8 @@ BEGIN
     FROM tasks.Tasks AS t
     INNER JOIN tasks.Priorities AS p ON p.PriorityId = t.PriorityId
     INNER JOIN tasks.Statuses   AS s ON s.StatusId   = t.StatusId
-    WHERE (@StatusId   IS NULL OR t.StatusId   = @StatusId)
-      AND (@PriorityId IS NULL OR t.PriorityId = @PriorityId)
+    WHERE (@StatusCode   IS NULL OR s.Code = @StatusCode)
+      AND (@PriorityCode IS NULL OR p.Code = @PriorityCode)
     ORDER BY p.SortOrder DESC, t.CreatedAt DESC;
 END
 GO

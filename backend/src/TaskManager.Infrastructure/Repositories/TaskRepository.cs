@@ -8,22 +8,6 @@ namespace TaskManager.Infrastructure.Repositories;
 
 public sealed class TaskRepository : ITaskRepository
 {
-    private static readonly IReadOnlyDictionary<string, byte> StatusIds =
-        new Dictionary<string, byte>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["PENDING"] = 1,
-            ["IN_PROGRESS"] = 2,
-            ["DONE"] = 3
-        };
-
-    private static readonly IReadOnlyDictionary<string, byte> PriorityIds =
-        new Dictionary<string, byte>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["LOW"] = 1,
-            ["MEDIUM"] = 2,
-            ["HIGH"] = 3
-        };
-
     private readonly ISqlConnectionFactory _connectionFactory;
 
     public TaskRepository(ISqlConnectionFactory connectionFactory)
@@ -37,8 +21,8 @@ public sealed class TaskRepository : ITaskRepository
         CancellationToken cancellationToken = default)
     {
         var parameters = new DynamicParameters();
-        parameters.Add("@StatusId", TryGetId(StatusIds, status), DbType.Byte);
-        parameters.Add("@PriorityId", TryGetId(PriorityIds, priority), DbType.Byte);
+        parameters.Add("@StatusCode", Normalize(status), DbType.String);
+        parameters.Add("@PriorityCode", Normalize(priority), DbType.String);
 
         using var connection = _connectionFactory.CreateConnection();
 
@@ -71,6 +55,6 @@ public sealed class TaskRepository : ITaskRepository
         return row?.ToDomain();
     }
 
-    private static byte? TryGetId(IReadOnlyDictionary<string, byte> ids, string? code) =>
-        string.IsNullOrWhiteSpace(code) ? null : ids[code.Trim()];
+    private static string? Normalize(string? code) =>
+        string.IsNullOrWhiteSpace(code) ? null : code.Trim().ToUpperInvariant();
 }
