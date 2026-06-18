@@ -48,7 +48,7 @@ flowchart LR
     REPO -->|stored procedures| DB[(SQL Server)]
 ```
 
-En Android uso `10.0.2.2:5080` porque el emulador no llega al `localhost` de Windows directamente. Esa diferencia quedo aislada en `frontend/src/config/env.ts`.
+La URL de la API quedo aislada en `frontend/src/config/env.ts`. Para la entrega apunta a la API publicada; en local se puede cambiar a `10.0.2.2:5080` si se prueba desde emulador Android.
 
 ## Frontend
 
@@ -90,6 +90,12 @@ Prioridades y estados estan en tablas aparte. Preferi eso antes que guardar text
 ### Filtros por codigo
 
 La API filtra por codigos (`PENDING`, `DONE`, `HIGH`, etc.). Los ids internos quedan en la base y no forman parte del contrato HTTP.
+
+### Filtros dentro del listado
+
+Los filtros se resolvieron dentro de la pantalla principal en vez de llevarlos a una pantalla aparte. Para este caso me parecio mas directo: el usuario cambia estado o prioridad y ve el resultado en el mismo listado.
+
+La logica no quedo mezclada con la pantalla. El panel vive en `TaskFilters` y la carga de datos queda en hooks, asi que se podria mover a otra pantalla sin cambiar la forma en que se consulta la API.
 
 ### Contratos de tareas
 
