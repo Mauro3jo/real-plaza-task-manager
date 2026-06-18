@@ -6,6 +6,7 @@
 .vs/
 TestResults/
 *.trx
+publish/
 
 # Node / React Native
 node_modules/

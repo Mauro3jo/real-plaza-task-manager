@@ -140,7 +140,19 @@ BEGIN
 
         (N'Preparar datos de prueba',
          N'Cargar tareas de ejemplo representativas para la demo.',
-         2, 3, SYSUTCDATETIME());
+         2, 3, SYSUTCDATETIME()),
+
+        (N'Revisar respuesta de errores',
+         N'Validar que los casos no encontrados y filtros incorrectos respondan de forma clara.',
+         3, 1, DATEADD(HOUR, -8, SYSUTCDATETIME())),
+
+        (N'Ajustar textos de interfaz',
+         N'Revisar etiquetas y mensajes visibles para que sean claros en la app.',
+         1, 2, DATEADD(HOUR, -6, SYSUTCDATETIME())),
+
+        (N'Ordenar capturas para entrega',
+         N'Dejar evidencias simples de Swagger, app Android y pruebas ejecutadas.',
+         1, 3, DATEADD(HOUR, -4, SYSUTCDATETIME()));
 END
 GO
 
