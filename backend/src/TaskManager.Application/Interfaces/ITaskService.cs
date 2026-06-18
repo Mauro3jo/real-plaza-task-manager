@@ -4,12 +4,12 @@ namespace TaskManager.Application.Interfaces;
 
 public interface ITaskService
 {
-    Task<IReadOnlyList<TaskItemDto>> GetTasksAsync(
+    Task<IReadOnlyList<TaskListItemDto>> GetTasksAsync(
         string? status,
         string? priority,
         CancellationToken cancellationToken = default);
 
-    Task<TaskItemDto> GetByIdAsync(
+    Task<TaskDetailDto> GetByIdAsync(
         int id,
         CancellationToken cancellationToken = default);
 }

@@ -1,6 +1,6 @@
 namespace TaskManager.Application.DTOs;
 
-public sealed record TaskItemDto(
+public sealed record TaskDetailDto(
     int Id,
     string Title,
     string Description,

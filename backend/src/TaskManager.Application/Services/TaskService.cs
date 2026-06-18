@@ -20,7 +20,7 @@ public sealed class TaskService : ITaskService
         _catalogRepository = catalogRepository;
     }
 
-    public async Task<IReadOnlyList<TaskItemDto>> GetTasksAsync(
+    public async Task<IReadOnlyList<TaskListItemDto>> GetTasksAsync(
         string? status,
         string? priority,
         CancellationToken cancellationToken = default)
@@ -34,10 +34,10 @@ public sealed class TaskService : ITaskService
             throw new ValidationException("Prioridad inválida.");
 
         var tasks = await _taskRepository.GetAllAsync(status, priority, cancellationToken);
-        return tasks.Select(task => task.ToDto()).ToList();
+        return tasks.Select(task => task.ToListItemDto()).ToList();
     }
 
-    public async Task<TaskItemDto> GetByIdAsync(
+    public async Task<TaskDetailDto> GetByIdAsync(
         int id,
         CancellationToken cancellationToken = default)
     {
@@ -47,7 +47,7 @@ public sealed class TaskService : ITaskService
         var task = await _taskRepository.GetByIdAsync(id, cancellationToken)
             ?? throw NotFoundException.ForTask(id);
 
-        return task.ToDto();
+        return task.ToDetailDto();
     }
 
     private static bool IsValid(string? code, IReadOnlyList<CatalogOption> options) =>

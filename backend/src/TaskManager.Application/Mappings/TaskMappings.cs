@@ -5,7 +5,17 @@ namespace TaskManager.Application.Mappings;
 
 internal static class TaskMappings
 {
-    public static TaskItemDto ToDto(this TaskItem task) =>
+    public static TaskListItemDto ToListItemDto(this TaskItem task) =>
+        new(
+            task.Id,
+            task.Title,
+            task.Description,
+            task.PriorityCode,
+            task.PriorityName,
+            task.StatusCode,
+            task.StatusName);
+
+    public static TaskDetailDto ToDetailDto(this TaskItem task) =>
         new(
             task.Id,
             task.Title,

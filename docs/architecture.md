@@ -91,6 +91,10 @@ Prioridades y estados están en tablas aparte. Preferí eso antes que guardar te
 
 La API usa `PENDING`, `DONE`, `HIGH`, etc. Los ids quedan adentro de la base y no se filtran hacia el contrato HTTP.
 
+### Contratos de tareas
+
+El listado y el detalle usan DTOs separados (`TaskListItemDto` y `TaskDetailDto`). Hoy comparten campos, pero quedan desacoplados para poder evolucionar cada respuesta sin tocar la otra.
+
 ### Errores
 
 Hay un middleware para no repetir `try/catch` en cada endpoint. Las validaciones salen como `400`, los recursos inexistentes como `404` y el resto como `500` generico.

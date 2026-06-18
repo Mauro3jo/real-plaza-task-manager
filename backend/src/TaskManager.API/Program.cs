@@ -36,7 +36,7 @@ app.MapGet("/api/tasks", async (
     })
     .WithName("GetTasks")
     .WithTags("Tasks")
-    .Produces<IReadOnlyList<TaskItemDto>>()
+    .Produces<IReadOnlyList<TaskListItemDto>>()
     .Produces(StatusCodes.Status400BadRequest);
 
 app.MapGet("/api/tasks/{id:int}", async (
@@ -49,7 +49,7 @@ app.MapGet("/api/tasks/{id:int}", async (
     })
     .WithName("GetTaskById")
     .WithTags("Tasks")
-    .Produces<TaskItemDto>()
+    .Produces<TaskDetailDto>()
     .Produces(StatusCodes.Status400BadRequest)
     .Produces(StatusCodes.Status404NotFound);
 
