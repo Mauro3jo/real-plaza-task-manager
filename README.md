@@ -18,7 +18,7 @@ Permite listar tareas, filtrar por estado/prioridad y ver el detalle de una tare
 ```text
 backend/
   src/
-    TaskManager.API/             API HTTP y Swagger
+    TaskManager.API/             Controllers, API HTTP y Swagger
     TaskManager.Application/     casos de uso, DTOs y validaciones
     TaskManager.Domain/          entidades y contratos
     TaskManager.Infrastructure/  Dapper, SQL Server y repositorios

@@ -13,7 +13,7 @@ flowchart TD
     INF --> DB[(SQL Server)]
 ```
 
-- `API`: endpoints, Swagger y middleware de errores.
+- `API`: controllers, Swagger y middleware de errores.
 - `Application`: validación de filtros y armado de respuestas.
 - `Domain`: entidades y contratos de repositorios.
 - `Infrastructure`: Dapper, conexión SQL y llamadas a stored procedures.
