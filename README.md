@@ -1,8 +1,8 @@
 # Real Plaza Task Manager
 
-Solución fullstack para el reto técnico de Real Plaza.
+Proyecto fullstack para la prueba tecnica de Real Plaza.
 
-Permite listar tareas, filtrar por estado/prioridad y ver el detalle de una tarea desde una app React Native conectada a una API .NET. La API usa SQL Server y consulta la base con procedimientos almacenados.
+La app permite listar tareas, filtrar por estado/prioridad y ver el detalle de cada tarea. El frontend esta hecho con React Native CLI y consume una API .NET conectada a SQL Server mediante stored procedures.
 
 ## Stack
 
@@ -11,15 +11,15 @@ Permite listar tareas, filtrar por estado/prioridad y ver el detalle de una tare
 - SQL Server
 - Dapper
 - Swagger
-- xUnit y Jest para pruebas unitarias
+- xUnit, Jest, ESLint y Prettier
 
 ## Estructura
 
 ```text
 backend/
   src/
-    TaskManager.API/             Controllers, API HTTP y Swagger
-    TaskManager.Application/     casos de uso, DTOs y validaciones
+    TaskManager.API/             controllers, Swagger y middleware
+    TaskManager.Application/     servicios, DTOs, validaciones y mapeos
     TaskManager.Domain/          entidades y contratos
     TaskManager.Infrastructure/  Dapper, SQL Server y repositorios
   tests/
@@ -38,8 +38,8 @@ frontend/
     domain/               tipos del contrato
     features/tasks/       pantallas, hooks y componentes de tareas
     navigation/           stack y tipos de rutas
-    theme/                tokens visuales
-    styles/               estilos de la app
+    theme/                colores, espaciados y badges
+    styles/               estilos compartidos
   android/
 
 docs/
@@ -55,11 +55,11 @@ sqlcmd -S localhost -E -i database\01_schema_and_seed.sql
 sqlcmd -S localhost -E -i database\02_stored_procedures.sql
 ```
 
-Los scripts crean la base `TaskManagerDb`, cargan datos de ejemplo y crean los procedimientos usados por la API.
+Los scripts crean `TaskManagerDb`, cargan datos de ejemplo y crean los stored procedures que usa la API.
 
 ## Config local
 
-La conexión local está en:
+La conexion local esta en:
 
 ```text
 backend/src/TaskManager.API/appsettings.Development.json
@@ -107,7 +107,7 @@ cd frontend
 npm run android -- --no-packager
 ```
 
-La app usa `http://10.0.2.2:5080` en el emulador Android para llegar al backend local. En iOS usa `http://localhost:5080`.
+En Android la app apunta a `http://10.0.2.2:5080` para llegar al backend local. En iOS queda `http://localhost:5080`.
 
 ## Endpoints
 
@@ -121,7 +121,7 @@ GET /api/tasks?status=DONE&priority=HIGH
 GET /api/tasks/{id}
 ```
 
-Valores válidos:
+Valores validos:
 
 ```text
 status: PENDING, IN_PROGRESS, DONE
@@ -130,20 +130,34 @@ priority: LOW, MEDIUM, HIGH
 
 ## Pruebas
 
+Backend:
+
 ```powershell
-dotnet test backend\tests\TaskManager.UnitTests\TaskManager.UnitTests.csproj
+dotnet build backend\src\TaskManager.API\TaskManager.API.csproj -c Release
+dotnet test backend\tests\TaskManager.UnitTests\TaskManager.UnitTests.csproj -c Release
+```
+
+Frontend:
+
+```powershell
 cd frontend
-npm test
 npm run lint
 npm run format:check
 npm run tsc
+npm test -- --runInBand
 ```
 
-## Notas técnicas
+Build Android:
 
-Dejé un resumen de arquitectura y flujo en:
+```powershell
+cd frontend\android
+.\gradlew.bat :app:assembleDebug
+```
+
+## Notas tecnicas
+
+El detalle de arquitectura, flujo app/API/DB y decisiones esta en:
 
 ```text
 docs/architecture.md
 ```
-

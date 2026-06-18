@@ -1,6 +1,6 @@
 # Notas de arquitectura
 
-El reto es chico, pero lo separé en capas para no dejar todo en `Program.cs`. La API queda como entrada HTTP, Application concentra el caso de uso y Infrastructure se encarga de SQL Server.
+La idea fue resolver el reto sin dejar todo mezclado en un solo archivo. El proyecto es chico, pero lo arme con capas para que quede claro donde vive cada responsabilidad.
 
 ## Capas
 
@@ -13,10 +13,10 @@ flowchart TD
     INF --> DB[(SQL Server)]
 ```
 
-- `API`: controllers, Swagger y middleware de errores.
-- `Application`: validación de filtros y armado de respuestas.
-- `Domain`: entidades y contratos de repositorios.
-- `Infrastructure`: Dapper, conexión SQL y llamadas a stored procedures.
+- `API`: controllers, Swagger, health check y middleware de errores.
+- `Application`: casos de uso, validaciones, DTOs y mapeos.
+- `Domain`: entidades y contratos de repositorio.
+- `Infrastructure`: Dapper, conexion SQL Server y llamadas a stored procedures.
 
 ## Flujo de una consulta
 
@@ -38,7 +38,7 @@ sequenceDiagram
     API-->>Client: JSON
 ```
 
-## Comunicación app/API/DB
+## Comunicacion app/API/DB
 
 ```mermaid
 flowchart LR
@@ -48,11 +48,11 @@ flowchart LR
     REPO -->|stored procedures| DB[(SQL Server)]
 ```
 
-En Android, la app usa `10.0.2.2:5080` para llegar al backend local. En el código quedó separado en `frontend/src/config/env.ts`.
+En Android uso `10.0.2.2:5080` porque el emulador no llega al `localhost` de Windows directamente. Esa diferencia quedo aislada en `frontend/src/config/env.ts`.
 
 ## Frontend
 
-La app quedó organizada por feature para que no dependa todo de `App.tsx`:
+La app esta separada por feature para que `App.tsx` no concentre toda la logica:
 
 ```text
 src/api/                 cliente HTTP y endpoints
@@ -63,17 +63,17 @@ src/features/tasks/
   hooks/                 carga de tareas, filtros y detalle
   screens/               listado y detalle
 src/navigation/          stack principal y tipos de rutas
-src/theme/               colores, espaciados, tipografÃ­a y badges
+src/theme/               colores, espaciados, fuentes y badges
 src/styles/              estilos compartidos
 ```
 
-No se usa UI Kit. Los componentes son propios y consumen la API real: listado, filtros y detalle. La navegaciÃ³n entre pantallas queda en un stack de React Navigation.
+No use UI Kit. La idea fue mantener componentes propios y simples: lista, filtros, estados de carga/error/vacio y detalle.
 
-## Cosas que decidí
+## Decisiones
 
 ### Stored procedures
 
-Los repositorios no tienen SQL inline. Llaman a los SPs del script:
+Los repositorios no tienen SQL inline para las consultas principales. Llaman a los SPs del script:
 
 ```text
 tasks.usp_Tasks_GetList
@@ -81,24 +81,33 @@ tasks.usp_Tasks_GetById
 tasks.usp_FilterOptions_Get
 ```
 
-Esto también deja alineado el código con el requisito del PDF.
+Esto deja el backend alineado con el requisito de usar procedimientos almacenados.
 
-### Catálogos
+### Catalogos
 
-Prioridades y estados están en tablas aparte. Preferí eso antes que guardar textos libres en `Tasks`, porque los mismos valores se usan para filtros, respuestas y validación.
+Prioridades y estados estan en tablas aparte. Preferi eso antes que guardar textos libres en `Tasks`, porque esos valores se usan para filtros, validaciones y respuestas.
 
-### Filtros con código
+### Filtros por codigo
 
-La API usa `PENDING`, `DONE`, `HIGH`, etc. Los ids quedan adentro de la base y no se filtran hacia el contrato HTTP.
+La API filtra por codigos (`PENDING`, `DONE`, `HIGH`, etc.). Los ids internos quedan en la base y no forman parte del contrato HTTP.
 
 ### Contratos de tareas
 
-El listado y el detalle usan DTOs separados (`TaskListItemDto` y `TaskDetailDto`). Hoy comparten campos, pero quedan desacoplados para poder evolucionar cada respuesta sin tocar la otra.
+El listado y el detalle tienen DTOs separados:
+
+```text
+TaskListItemDto
+TaskDetailDto
+```
+
+Hoy comparten campos, pero quedan separados para que el detalle pueda crecer sin cambiar la respuesta del listado.
 
 ### Errores
 
-Hay un middleware para no repetir `try/catch` en cada endpoint. Las validaciones salen como `400`, los recursos inexistentes como `404` y el resto como `500` generico.
+Hay un middleware para centralizar errores. Las validaciones devuelven `400`, una tarea inexistente devuelve `404` y los errores no controlados devuelven `500` generico.
 
 ### Tests
 
-Los tests van contra Application con repositorios falsos. No prueban SQL Server; prueban reglas de negocio y mapeo básico.
+Los tests del backend van contra Application con repositorios falsos. No prueban SQL Server; prueban reglas de negocio, validaciones y mapeos.
+
+En el frontend deje tests de la capa API, typecheck, lint y check de formato. La cobertura apunta a la parte mas sensible del front: rutas, query strings y manejo de errores al consumir la API.
